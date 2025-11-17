@@ -1,0 +1,21 @@
+{
+  // Enable format on save
+  "editor.formatOnSave": true,
+  
+  // Auto-fix ESLint issues on save (runs after formatting)
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  
+  // ESLint settings
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  
+  // Enable ESLint for all file types
+  "eslint.enable": true
+}
+
