@@ -137,6 +137,7 @@ export async function GET(
         onMessage: async (message: StreamCallbackMessage) => {
           try {
             // Send agent message via SSE
+            console.log("eko-message: ", JSON.stringify(message, null, 2));
             controller.enqueue(
               encoder.encode(formatSSEMessage('message', message))
             );
