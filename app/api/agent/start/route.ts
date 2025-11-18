@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { agentStart, validateQuery } from '../service';
-import type { AgentStartResponse } from '../types';
+import { agentStart, validateQuery } from '@/app/api/agent/service';
+import type { AgentStartResponse } from '@/app/api/agent/types';
 
 /**
  * Agent Start API endpoint
@@ -14,22 +14,27 @@ import type { AgentStartResponse } from '../types';
 /**
  * Common logic to process agent start request
  */
-async function processAgentStart(query: string): Promise<Response> {
-  // Validate query content
-  const validation = validateQuery(query);
-  if (!validation.valid) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: validation.error,
-        timestamp: new Date().toISOString(),
-      } as AgentStartResponse,
-      { status: 400 }
-    );
+async function processAgentStart(
+  query: string,
+  params?: Record<string, unknown>
+): Promise<Response> {
+  // Validate query content (allow empty string)
+  if (query && query.trim().length > 0) {
+    const validation = validateQuery(query);
+    if (!validation.valid) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: validation.error,
+          timestamp: new Date().toISOString(),
+        } as AgentStartResponse,
+        { status: 400 }
+      );
+    }
   }
   
-  // Start agent task and get task ID
-  const result = await agentStart(query);
+  // Start agent task and get task ID (use empty string if query is not provided)
+  const result = await agentStart(query || '', params);
   
   return NextResponse.json(
     {
@@ -65,21 +70,18 @@ function errorResponse(error: unknown, method: string): Response {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    // Support both 'query' and 'q' as aliases
-    const query = searchParams.get('query') || searchParams.get('q');
-    // Validate query parameter
-    if (!query) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Query parameter is required (use "query" or "q")',
-          timestamp: new Date().toISOString(),
-        } as AgentStartResponse,
-        { status: 400 }
-      );
-    }
+    // Support both 'query' and 'q' as aliases, default to empty string if not provided
+    const query = searchParams.get('query') || searchParams.get('q') || '';
     
-    return await processAgentStart(query);
+    // Extract other parameters from query string
+    const params: Record<string, unknown> = {};
+    searchParams.forEach((value, key) => {
+      if (key !== 'query' && key !== 'q') {
+        params[key] = value;
+      }
+    });
+    
+    return await processAgentStart(query, Object.keys(params).length > 0 ? params : undefined);
   } catch (error) {
     return errorResponse(error, 'GET');
   }
@@ -93,19 +95,14 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     
-    // Validate request body
-    if (!body.query) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Query field is required in request body',
-          timestamp: new Date().toISOString(),
-        } as AgentStartResponse,
-        { status: 400 }
-      );
-    }
+    // Use empty string as default if query is not provided
+    const query = body.query || '';
     
-    return await processAgentStart(body.query);
+    // Extract external parameters (everything except query)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { query: _, ...params } = body;
+    
+    return await processAgentStart(query, params);
   } catch (error) {
     return errorResponse(error, 'POST');
   }
