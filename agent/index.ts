@@ -1,17 +1,5 @@
-import dotenv from "dotenv";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 import { BrowserAgent, FileAgent } from "@eko-ai/eko-nodejs";
 import { Eko, Agent, Log, LLMs, StreamCallbackMessage } from "@eko-ai/eko";
-
-// Get the directory of the current module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Load .env file from agent directory or project root
-dotenv.config({ path: join(__dirname, ".env") });
-// Also try project root .env file (for Next.js)
-dotenv.config({ path: join(__dirname, "..", ".env") });
 
 const openrouterApiKey = process.env.OPENROUTER_API_KEY;
 const openrouterBaseURL = process.env.OPENROUTER_BASE_URL;
@@ -65,15 +53,4 @@ export async function run(options?: {
   console.log("result: ", result.result);
   
   return result;
-}
-
-// Only run if executed directly via command line (e.g., npx tsx agent/index.ts)
-// Not run when imported as a module
-// Extract filename from import.meta.url and check if it matches process.argv[1]
-const currentFileName = import.meta.url.split('/').pop() || '';
-const isMainModule = process.argv[1]?.endsWith(currentFileName);
-if (isMainModule) {
-  run().catch((e) => {
-    console.log(e);
-  });
 }

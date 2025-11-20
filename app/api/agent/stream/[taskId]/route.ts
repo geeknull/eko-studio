@@ -11,10 +11,17 @@ import type { StreamCallbackMessage } from '@eko-ai/eko';
  */
 
 /**
- * Format SSE message
+ * SSE Event Types matching frontend expectation
  */
-function formatSSEMessage(event: string, data: unknown): string {
-  return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+type SSEEventType = 'connected' | 'message' | 'completed' | 'error';
+
+/**
+ * Format SSE message
+ * Note: We always send event as 'message' to ensure frontend EventSource.onmessage handles it,
+ * but we inject the actual event type into the data payload.
+ */
+function formatSSEMessage(eventType: SSEEventType, data: unknown): string {
+  return `event: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`;
 }
 
 /**
@@ -138,11 +145,21 @@ export async function GET(
           try {
             // Send agent message via SSE
             console.log("eko-message: ", JSON.stringify(message, null, 2));
+            const time = new Date();
             controller.enqueue(
-              encoder.encode(formatSSEMessage('message', message))
+              encoder.encode(formatSSEMessage('message', {
+                time: time.toISOString(),
+                timestamp: time.getTime(),
+                content: message
+              }))
             );
           } catch (error) {
-            console.error('Error sending SSE message:', error);
+            // Check for invalid state error which indicates stream closure
+            if (error instanceof TypeError && (error.message.includes('Invalid state') || error.message.includes('Controller is already closed'))) {
+                console.warn('SSE connection closed by client during message send');
+            } else {
+                console.error('Error sending SSE message:', error);
+            }
           }
         },
       };
@@ -186,8 +203,12 @@ export async function GET(
         updateTaskStatus(taskId, 'error');
       } finally {
         // Close the stream
+        console.log(`[SSE] Stream closed (execution finished) for taskId: ${taskId}`);
         controller.close();
       }
+    },
+    cancel(reason) {
+      console.log(`[SSE] Stream closed (client cancelled) for taskId: ${taskId}`, reason ? `Reason: ${reason}` : '');
     },
   });
 

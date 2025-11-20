@@ -73,6 +73,7 @@ export function updateTaskStatus(
  * Clean up completed tasks (optional, for memory management)
  */
 export function cleanupTask(taskId: string): void {
+  console.log(`[cleanupTask] Removing taskId: ${taskId} at ${new Date().toISOString()}`);
   taskStore.delete(taskId);
 }
 
