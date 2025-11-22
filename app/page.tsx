@@ -1,8 +1,8 @@
 "use client"
 
 import React from 'react'
-import { ConfigProvider, Layout, Card, Button, Space, Typography, Input, Spin, Avatar, message } from 'antd'
-import { Bubble, XProvider } from '@ant-design/x'
+import { ConfigProvider, Layout, Card, Typography, Spin, Avatar, message } from 'antd'
+import { Bubble, XProvider, Sender } from '@ant-design/x'
 import { RobotOutlined } from '@ant-design/icons'
 import { useChatStore, ChatMessage } from '@/store/chatStore'
 import { useSSE } from '@/hooks/useSSE'
@@ -11,7 +11,6 @@ import { JsonViewModal } from '@/components/base/JsonViewModal'
 
 const { Header, Content } = Layout
 const { Title } = Typography
-const { TextArea } = Input
 
 function App() {
   const {  
@@ -155,29 +154,27 @@ function App() {
                   </div>
                 </div>
               )}
-              <div className="border-t pt-4 flex-shrink-0">
-                <Space.Compact className="w-full">
-                  <TextArea
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onPressEnter={(e) => {
-                      if (!e.shiftKey) {
-                        e.preventDefault()
-                        handleSend()
-                      }
-                    }}
-                    placeholder="Type a message... (Shift+Enter to send)"
-                    autoSize={{ minRows: 1, maxRows: 4 }}
-                    disabled={isLoading}
-                  />
-                  <Button 
-                    type="primary" 
-                    onClick={handleSend}
-                    disabled={isLoading || !inputValue.trim()}
-                  >
-                    Send
-                  </Button>
-                </Space.Compact>
+              <div className="border-t pt-4 flex-shrink-0 px-4">
+                <Sender
+                  value={inputValue}
+                  onChange={setInputValue}
+                  onSubmit={(message) => {
+                    if (message.trim()) {
+                      handleSend()
+                    }
+                  }}
+                  onCancel={() => {
+                    if (isLoading) {
+                      // Handle cancel/stop logic here if needed
+                      setLoading(false)
+                    }
+                  }}
+                  placeholder="Type a message..."
+                  loading={isLoading}
+                  disabled={isLoading}
+                  submitType="enter"
+                  autoSize={{ minRows: 2, maxRows: 6 }}
+                />
               </div>
             </Card>
           </Content>
