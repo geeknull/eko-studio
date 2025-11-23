@@ -1,7 +1,9 @@
 import { NextRequest } from 'next/server';
 import { getTask, updateTaskStatus, getTaskStoreSize, getAllTaskIds } from '@/app/api/agent/service';
-import { run } from '@/agent/index';
-import type { StreamCallbackMessage } from '@eko-ai/eko';
+import { handleRun } from '../handlers/runHandler';
+import { handleReplay } from '../handlers/replayHandler';
+
+export const runtime = 'nodejs';
 
 /**
  * SSE endpoint for agent streaming
@@ -26,6 +28,9 @@ function formatSSEMessage(eventType: SSEEventType, data: unknown): string {
 
 /**
  * Handle GET requests for SSE streaming
+ * Supports two modes:
+ * - mode=run (default): Actually run the Agent
+ * - mode=replay: Replay recorded logs
  */
 export async function GET(
   request: NextRequest,
@@ -35,7 +40,16 @@ export async function GET(
   const resolvedParams = await Promise.resolve(params);
   const { taskId } = resolvedParams;
 
+  // Parse query parameters
+  const { searchParams } = new URL(request.url);
+  const mode = searchParams.get('mode') || 'replay'; // 'run' or 'replay'
+  const logFile = searchParams.get('logFile'); // Specified log file (replay mode)
+  const playbackMode = searchParams.get('playbackMode') || 'realtime'; // Playback mode
+  const speed = parseFloat(searchParams.get('speed') || '1.0'); // Playback speed
+  const fixedInterval = parseInt(searchParams.get('fixedInterval') || '1000', 10); // Fixed interval
+
   console.log('SSE Request - taskId:', taskId);
+  console.log('SSE Request - mode:', mode);
   console.log('SSE Request - resolvedParams:', resolvedParams);
 
   // Get task information
@@ -126,6 +140,44 @@ export async function GET(
     );
   }
 
+  // Validate parameters
+  if (mode === 'replay') {
+    // Validate replay parameters
+    if (speed < 0.1 || speed > 100) {
+      return new Response(
+        formatSSEMessage('error', {
+          error: 'Invalid speed parameter',
+          message: 'Speed must be between 0.1 and 100',
+        }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        }
+      );
+    }
+    
+    if (fixedInterval < 10 || fixedInterval > 60000) {
+      return new Response(
+        formatSSEMessage('error', {
+          error: 'Invalid fixedInterval parameter',
+          message: 'Fixed interval must be between 10 and 60000 ms',
+        }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        }
+      );
+    }
+  }
+
   // Update task status to running
   updateTaskStatus(taskId, 'running');
 
@@ -136,57 +188,40 @@ export async function GET(
 
       // Send initial connection message
       controller.enqueue(
-        encoder.encode(formatSSEMessage('connected', { taskId, status: 'connected' }))
+        encoder.encode(formatSSEMessage('connected', { 
+          taskId, 
+          status: 'connected',
+          mode,
+        }))
       );
 
-      // Create callback to send messages via SSE
-      const callback = {
-        onMessage: async (message: StreamCallbackMessage) => {
-          try {
-            // Send agent message via SSE
-            console.log("eko-message: ", JSON.stringify(message, null, 2));
-            const time = new Date();
-            controller.enqueue(
-              encoder.encode(formatSSEMessage('message', {
-                time: time.toISOString(),
-                timestamp: time.getTime(),
-                content: message
-              }))
-            );
-          } catch (error) {
-            // Check for invalid state error which indicates stream closure
-            if (error instanceof TypeError && (error.message.includes('Invalid state') || error.message.includes('Controller is already closed'))) {
-                console.warn('SSE connection closed by client during message send');
-            } else {
-                console.error('Error sending SSE message:', error);
-            }
-          }
-        },
-      };
-
       try {
-        // Run agent with task query, callback, and external parameters
-        await run({
-          query: task.query,
-          callback,
-          ...task.params, // Merge external parameters
-        });
-
-        // Send completion message
-        controller.enqueue(
-          encoder.encode(
-            formatSSEMessage('completed', {
-              taskId,
-              status: 'completed',
-              message: 'Agent execution completed',
-            })
-          )
-        );
-
-        // Update task status
-        updateTaskStatus(taskId, 'completed');
+        // Call different handlers based on mode
+        if (mode === 'replay') {
+          // ========================================
+          // Replay mode: Call replay handler
+          // ========================================
+          await handleReplay(controller, encoder, {
+            taskId,
+            logFile,
+            playbackMode,
+            speed,
+            fixedInterval,
+          });
+        } else {
+          // ========================================
+          // Run mode: Call run handler
+          // ========================================
+          await handleRun(controller, encoder, {
+            taskId,
+            task: {
+              query: task.query,
+              params: task.params,
+            },
+          });
+        }
       } catch (error) {
-        console.error('Agent execution error:', error);
+        console.error(`[SSE] ${mode} error:`, error);
 
         // Send error message
         controller.enqueue(
@@ -195,6 +230,7 @@ export async function GET(
               taskId,
               status: 'error',
               error: error instanceof Error ? error.message : 'Unknown error',
+              mode,
             })
           )
         );
@@ -203,12 +239,12 @@ export async function GET(
         updateTaskStatus(taskId, 'error');
       } finally {
         // Close the stream
-        console.log(`[SSE] Stream closed (execution finished) for taskId: ${taskId}`);
+        console.log(`[SSE] Stream closed for taskId: ${taskId}, mode: ${mode}`);
         controller.close();
       }
     },
     cancel(reason) {
-      console.log(`[SSE] Stream closed (client cancelled) for taskId: ${taskId}`, reason ? `Reason: ${reason}` : '');
+      console.log(`[SSE] Stream cancelled for taskId: ${taskId}`, reason ? `Reason: ${reason}` : '');
     },
   });
 

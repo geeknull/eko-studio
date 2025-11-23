@@ -1,5 +1,7 @@
 import { BrowserAgent, FileAgent } from "@eko-ai/eko-nodejs";
 import { Eko, Agent, Log, LLMs, StreamCallbackMessage } from "@eko-ai/eko";
+import { AgentLogger } from "./logger";
+export const runtime = 'nodejs';
 
 const openrouterApiKey = process.env.OPENROUTER_API_KEY;
 const openrouterBaseURL = process.env.OPENROUTER_BASE_URL;
@@ -35,9 +37,16 @@ const _query = "Search for the latest news about Musk, summarize and save to the
 export async function run(options?: { 
   query?: string; 
   callback?: Callback;
+  enableLog?: boolean; // Whether to enable logging, default is true
   [key: string]: unknown; // Allow additional external parameters
 }) {
-  const { callback = _callback, query = _query, ...externalParams } = options || {};
+  const { 
+    callback = _callback, 
+    query = _query, 
+    enableLog = true,
+    ...externalParams 
+  } = options || {};
+  
   console.log('agent:llms', llms);
   
   // Log external parameters if provided
@@ -45,12 +54,40 @@ export async function run(options?: {
     console.log('External parameters:', externalParams);
   }
   
-  Log.setLevel(1);
-  const agents: Agent[] = [new BrowserAgent(), new FileAgent()];
-  const eko = new Eko({ llms, agents, callback });
-  const result = await eko.run(query);
+  // Initialize logger
+  const logger = new AgentLogger({
+    modelName: llms.default.model,
+    enabled: enableLog,
+  });
   
-  console.log("result: ", result.result);
+  // Wrap callback to add logging functionality
+  const wrappedCallback: Callback = {
+    onMessage: async (message: StreamCallbackMessage) => {
+      // Log first
+      await logger.log(message);
+      
+      // Then call original callback
+      await callback.onMessage(message);
+    },
+  };
   
-  return result;
+  try {
+    Log.setLevel(1);
+    const agents: Agent[] = [new BrowserAgent(), new FileAgent()];
+    const eko = new Eko({ llms, agents, callback: wrappedCallback });
+    const result = await eko.run(query);
+    
+    console.log("result: ", result.result);
+    
+    // Output log file path
+    if (logger.isEnabled()) {
+      console.log(`Log saved to: ${logger.getLogFilePath()}`);
+      console.log(`Total messages: ${logger.getMessageCount()}`);
+    }
+    
+    return result;
+  } finally {
+    // Ensure logger is properly closed
+    await logger.close();
+  }
 }
