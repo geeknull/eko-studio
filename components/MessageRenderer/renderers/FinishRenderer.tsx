@@ -69,7 +69,7 @@ export const FinishRenderer: React.FC<FinishRendererProps> = React.memo(({
                   <Statistic
                     title="Prompt Tokens"
                     value={usage.promptTokens}
-                    valueStyle={{ fontSize: '20px', color: '#1890ff' }}
+                    styles={{ value: { fontSize: '20px', color: '#1890ff' } }}
                   />
                 </Card>
               </Col>
@@ -78,7 +78,7 @@ export const FinishRenderer: React.FC<FinishRendererProps> = React.memo(({
                   <Statistic
                     title="Completion Tokens"
                     value={usage.completionTokens}
-                    valueStyle={{ fontSize: '20px', color: '#52c41a' }}
+                    styles={{ value: { fontSize: '20px', color: '#52c41a' } }}
                   />
                 </Card>
               </Col>
@@ -87,7 +87,7 @@ export const FinishRenderer: React.FC<FinishRendererProps> = React.memo(({
                   <Statistic
                     title="Total Tokens"
                     value={usage.totalTokens}
-                    valueStyle={{ fontSize: '20px', fontWeight: 'bold', color: '#fa8c16' }}
+                    styles={{ value: { fontSize: '20px', fontWeight: 'bold', color: '#fa8c16' } }}
                   />
                 </Card>
               </Col>

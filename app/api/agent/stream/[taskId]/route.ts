@@ -44,9 +44,9 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const mode = searchParams.get('mode') || 'replay'; // 'run' or 'replay'
   const logFile = searchParams.get('logFile'); // Specified log file (replay mode)
-  const playbackMode = searchParams.get('playbackMode') || 'realtime'; // Playback mode
+  const playbackMode = searchParams.get('playbackMode') || 'fixed'; // Playback mode realtime or fixed
   const speed = parseFloat(searchParams.get('speed') || '1.0'); // Playback speed
-  const fixedInterval = parseInt(searchParams.get('fixedInterval') || '1000', 10); // Fixed interval
+  const fixedInterval = parseInt(searchParams.get('fixedInterval') || '10', 10); // Fixed interval
 
   console.log('SSE Request - taskId:', taskId);
   console.log('SSE Request - mode:', mode);
