@@ -116,7 +116,7 @@ export const ToolRenderer: React.FC<ToolRendererProps> = React.memo(({
         borderColor: '#b7eb8f'
       }}
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         {/* Tool info */}
         <Descriptions size="small" column={1} bordered>
           <Descriptions.Item label={<Text strong>Tool Name</Text>}>

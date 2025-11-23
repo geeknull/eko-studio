@@ -41,7 +41,7 @@ export const AgentResultRenderer: React.FC<AgentResultRendererProps> = React.mem
   const hasError = error !== undefined && error !== null
 
   return (
-    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+    <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
       {/* Agent info card */}
       <div>
         <div style={{ 
@@ -79,14 +79,14 @@ export const AgentResultRenderer: React.FC<AgentResultRendererProps> = React.mem
       {/* Error message (if exists) */}
       {hasError && (
         <Alert
-          message={
+          title={
             <Space>
               <WarningOutlined style={{ fontSize: '16px' }} />
               <Text strong>Agent Execution Error</Text>
             </Space>
           }
           description={
-            <Space direction="vertical" size="small" style={{ width: '100%' }}>
+            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
               {typeof error === 'string' ? (
                 <Paragraph style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
                   {error}

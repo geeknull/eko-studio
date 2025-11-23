@@ -65,17 +65,17 @@ export const ErrorRenderer: React.FC<ErrorRendererProps> = React.memo(({
   }, [error])
 
   return (
-    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+    <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
       {/* Error alert */}
       <Alert
-        message={
+        title={
           <Space>
             <CloseCircleOutlined style={{ fontSize: '16px' }} />
             <Text strong>Error Occurred</Text>
           </Space>
         }
         description={
-          <Space direction="vertical" size="small" style={{ width: '100%' }}>
+          <Space orientation="vertical" size="small" style={{ width: '100%' }}>
             {errorInfo.name && errorInfo.name !== 'Error' && (
               <div>
                 <Text strong>Type: </Text>

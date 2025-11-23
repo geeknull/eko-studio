@@ -41,7 +41,7 @@ export const FinishRenderer: React.FC<FinishRendererProps> = React.memo(({
         borderColor: '#b7eb8f'
       }}
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         {/* Completion info */}
         <Descriptions size="small" column={1} bordered>
           <Descriptions.Item label={<Text strong>Finish Reason</Text>}>

@@ -22,7 +22,7 @@ export const useMessageItems = (
     role: message.role,
     content: message.content,
     avatar: <Avatar icon={message.role === 'user' ? <UserOutlined /> : <RobotOutlined />} />,
-    messageRender: message.type === 'eko' && typeof message.content !== 'string'
+    contentRender: message.type === 'eko' && typeof message.content !== 'string'
       ? (content: any) => <MessageRenderer content={content as StreamCallbackMessage} />
       : undefined,
     footer: (

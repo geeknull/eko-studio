@@ -151,7 +151,7 @@ export const FileRenderer: React.FC<FileRendererProps> = React.memo(({
         borderColor: '#d3adf7'
       }}
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         {/* File info */}
         <Descriptions size="small" column={1} bordered>
           <Descriptions.Item label={<Text strong>MIME Type</Text>}>

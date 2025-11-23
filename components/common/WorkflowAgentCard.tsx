@@ -275,7 +275,7 @@ export const WorkflowAgentCard: React.FC<WorkflowAgentCardProps> = React.memo(({
       }
       style={{ width: '100%' }}
     >
-      <Space direction="vertical" size="small" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="small" style={{ width: '100%' }}>
         <div>
           <Text type="secondary">id: </Text>
           <Text copyable>{agent.id}</Text>

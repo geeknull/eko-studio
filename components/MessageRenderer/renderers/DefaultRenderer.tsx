@@ -35,7 +35,7 @@ export const DefaultRenderer: React.FC<DefaultRendererProps> = React.memo(({
     <div>
       {/* Hint message */}
       <Alert
-        message={
+        title={
           <span>
             <InfoCircleOutlined style={{ marginRight: '8px' }} />
             Unknown message type: <Text code>{content.type}</Text>

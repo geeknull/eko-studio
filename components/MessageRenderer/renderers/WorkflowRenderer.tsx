@@ -39,7 +39,7 @@ export const WorkflowRenderer: React.FC<WorkflowRendererProps> = React.memo(({
           </Tag>
         )}
       </div>
-      <Space direction="vertical" size="small" style={{ width: '100%', marginTop: '8px' }}>
+      <Space orientation="vertical" size="small" style={{ width: '100%', marginTop: '8px' }}>
         {workflow.thought && (
           <ThoughtChain
             collapsible={{
@@ -94,7 +94,7 @@ export const WorkflowRenderer: React.FC<WorkflowRendererProps> = React.memo(({
             <Text strong style={{ fontSize: '14px', marginBottom: '8px', display: 'block' }}>
               agents ({workflow.agents.length})
             </Text>
-            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
               {workflow.agents.map((agent: WorkflowAgent) => (
                 <WorkflowAgentCard 
                   key={agent.id}
