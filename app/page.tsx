@@ -99,13 +99,7 @@ function App() {
   }
 
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: '#1890ff',
-        },
-      }}
-    >
+    <ConfigProvider>
       <XProvider>
         <Layout className="h-screen flex flex-col">
           <Header 
