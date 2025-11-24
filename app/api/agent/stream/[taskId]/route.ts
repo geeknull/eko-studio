@@ -29,7 +29,7 @@ function formatSSEMessage(eventType: SSEEventType, data: unknown): string {
 /**
  * Handle GET requests for SSE streaming
  * Supports two modes:
- * - mode=run (default): Actually run the Agent
+ * - mode=normal (default): Actually run the Agent
  * - mode=replay: Replay recorded logs
  */
 export async function GET(
@@ -42,7 +42,7 @@ export async function GET(
 
   // Parse query parameters
   const { searchParams } = new URL(request.url);
-  const mode = searchParams.get('mode') || 'replay'; // 'run' or 'replay'
+  const mode = searchParams.get('mode') || 'normal'; // 'normal' or 'replay'
   const logFile = searchParams.get('logFile'); // Specified log file (replay mode)
   const playbackMode = searchParams.get('playbackMode') || 'fixed'; // Playback mode realtime or fixed
   const speed = parseFloat(searchParams.get('speed') || '1.0'); // Playback speed

@@ -8,7 +8,8 @@ const openrouterBaseURL = process.env.OPENROUTER_BASE_URL;
 console.log('openrouterApiKey', openrouterApiKey);
 console.log('openrouterBaseURL', openrouterBaseURL);
 
-const llms: LLMs = {
+// Default LLM configuration (fallback)
+const defaultLLMs: LLMs = {
   default: {
     provider: "openrouter",
     model: "openai/gpt-5-nano",
@@ -20,6 +21,25 @@ const llms: LLMs = {
     },
   },
 };
+
+/**
+ * Normal mode configuration from frontend
+ */
+export interface NormalConfig {
+  llm: {
+    provider: string;
+    model: string;
+    apiKey: string;
+    config?: {
+      baseURL?: string;
+      temperature?: number;
+      topP?: number;
+      topK?: number;
+      maxTokens?: number;
+    };
+  };
+  agents: string[];
+}
 /**
  * Callback type for handling stream messages
  */
@@ -38,16 +58,47 @@ export async function run(options?: {
   query?: string; 
   callback?: Callback;
   enableLog?: boolean; // Whether to enable logging, default is true
+  normalConfig?: NormalConfig; // Normal mode configuration
   [key: string]: unknown; // Allow additional external parameters
 }) {
   const { 
     callback = _callback, 
     query = _query, 
     enableLog = true,
+    normalConfig,
     ...externalParams 
   } = options || {};
   
-  console.log('agent:llms', llms);
+  // Build LLMs configuration: use normalConfig if provided, otherwise use default
+  let llms: LLMs = defaultLLMs;
+  if (normalConfig?.llm) {
+    llms = {
+      default: {
+        provider: normalConfig.llm.provider as LLMs['default']['provider'],
+        model: normalConfig.llm.model,
+        apiKey: normalConfig.llm.apiKey,
+        config: normalConfig.llm.config || {},
+      },
+    };
+    console.log('Using normalConfig LLMs:', llms);
+  } else {
+    console.log('Using default LLMs:', llms);
+  }
+  
+  // Build agents configuration
+  let agents: Agent[] = [new BrowserAgent(), new FileAgent()]; // Default agents
+  if (normalConfig?.agents && normalConfig.agents.length > 0) {
+    agents = [];
+    if (normalConfig.agents.includes('BrowserAgent')) {
+      agents.push(new BrowserAgent());
+    }
+    if (normalConfig.agents.includes('FileAgent')) {
+      agents.push(new FileAgent());
+    }
+    console.log('Using normalConfig agents:', normalConfig.agents);
+  } else {
+    console.log('Using default agents: BrowserAgent, FileAgent');
+  }
   
   // Log external parameters if provided
   if (Object.keys(externalParams).length > 0) {
@@ -73,7 +124,6 @@ export async function run(options?: {
   
   try {
     Log.setLevel(1);
-    const agents: Agent[] = [new BrowserAgent(), new FileAgent()];
     const eko = new Eko({ llms, agents, callback: wrappedCallback });
     const result = await eko.run(query);
     

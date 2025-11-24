@@ -76,11 +76,15 @@ export async function handleRun(
     },
   };
 
+  // Extract normalConfig from params if present
+  const normalConfig = task.params?.normalConfig as Record<string, unknown> | undefined;
+  
   // Run agent
   await run({
     query: task.query,
     callback,
-    ...task.params, // Merge external parameters
+    normalConfig, // Pass normalConfig if provided
+    ...task.params, // Merge other external parameters
   });
 
   // Send completion message
