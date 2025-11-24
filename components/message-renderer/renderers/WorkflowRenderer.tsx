@@ -4,7 +4,7 @@ import { LoadingOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import { ThoughtChain } from '@ant-design/x'
 import type { ThoughtChainProps, ThoughtChainItem } from '@ant-design/x'
 import { LazySyntaxHighlighter } from '../../base/LazySyntaxHighlighter'
-import { WorkflowAgentCard } from '../../common/WorkflowAgentCard'
+import { WorkflowAgentCard } from '../WorkflowAgentCard'
 import type { StreamCallbackMessage, WorkflowAgent } from '../../../types'
 
 const { Text, Paragraph } = Typography

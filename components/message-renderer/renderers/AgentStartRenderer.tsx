@@ -1,5 +1,5 @@
 import React from 'react'
-import { WorkflowAgentCard } from '../../common/WorkflowAgentCard'
+import { WorkflowAgentCard } from '../WorkflowAgentCard'
 import type { StreamCallbackMessage, WorkflowAgent } from '../../../types'
 
 interface AgentStartRendererProps {

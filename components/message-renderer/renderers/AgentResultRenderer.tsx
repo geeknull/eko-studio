@@ -1,7 +1,7 @@
 import React from 'react'
 import { Space, Typography, Tag, Divider, Alert } from 'antd'
 import { CheckCircleOutlined, FileTextOutlined, CloseCircleOutlined, WarningOutlined } from '@ant-design/icons'
-import { WorkflowAgentCard } from '../../common/WorkflowAgentCard'
+import { WorkflowAgentCard } from '../WorkflowAgentCard'
 import { MarkdownRenderer } from '../../base/MarkdownRenderer'
 import { LazySyntaxHighlighter } from '../../base/LazySyntaxHighlighter'
 import type { StreamCallbackMessage } from '../../../types'

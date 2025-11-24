@@ -5,7 +5,7 @@ import { Avatar, Tag, Button, Space } from 'antd'
 import { UserOutlined, RobotOutlined, EyeOutlined } from '@ant-design/icons'
 import { ChatMessage } from '@/store/chatStore'
 import { StreamCallbackMessage } from '@/types'
-import { MessageRenderer } from '@/components/MessageRenderer'
+import { MessageRenderer } from '@/components/message-renderer'
 
 interface UseMessageItemsOptions {
   onViewJson?: (message: ChatMessage) => void
