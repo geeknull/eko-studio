@@ -5,6 +5,7 @@ import { Modal, Tabs, Form, Select, Input, InputNumber, Checkbox, Space, Typogra
 import { useConfigStore } from '@/store';
 import { ReplayConfig } from './ReplayConfigModal';
 import { NormalConfig, LLMProvider } from './NormalConfigModal';
+import { getModelOptions, getDefaultBaseURL } from './llmProviderUtils';
 
 const { Text } = Typography;
 
@@ -20,12 +21,21 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
   onCancel,
 }) => {
   const { mode: currentMode, normalConfig, replayConfig, updateConfig } = useConfigStore();
+  // Create form instances - will be connected when Forms render
   const [normalForm] = Form.useForm();
   const [replayForm] = Form.useForm();
   const [activeTab, setActiveTab] = React.useState<'normal' | 'replay'>(currentMode);
   const [showAdvanced, setShowAdvanced] = React.useState(false);
   const [playbackMode, setPlaybackMode] = React.useState<'realtime' | 'fixed'>(replayConfig.playbackMode);
   const [formKey, setFormKey] = React.useState(0);
+  const [isMounted, setIsMounted] = React.useState(false);
+  
+  // Only render forms after modal has been opened at least once
+  React.useEffect(() => {
+    if (open) {
+      setIsMounted(true);
+    }
+  }, [open]);
 
   // Calculate initial values
   const normalInitialValues = React.useMemo(() => {
@@ -128,19 +138,6 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     onCancel();
   };
 
-  // Get common models based on provider
-  const getModelOptions = (provider: LLMProvider) => {
-    const modelsByProvider: Record<LLMProvider, string[]> = {
-      'openai': ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-      'anthropic': ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229'],
-      'google': ['gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash'],
-      'aws': ['anthropic.claude-v2', 'anthropic.claude-instant-v1'],
-      'openrouter': ['openai/gpt-5-nano', 'anthropic/claude-sonnet-4.5', 'openai/gpt-5.1'],
-      'openai-compatible': [],
-      'modelscope': [],
-    };
-    return modelsByProvider[provider] || [];
-  };
 
   const providerOptions = [
     { value: 'openai', label: 'OpenAI' },
@@ -167,10 +164,12 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
       okText="Confirm"
       cancelText="Cancel"
     >
-      <Tabs
-        activeKey={activeTab}
-        onChange={key => setActiveTab(key as 'normal' | 'replay')}
-        items={[
+      {isMounted && (
+        <Tabs
+          activeKey={activeTab}
+          onChange={key => setActiveTab(key as 'normal' | 'replay')}
+          destroyOnHidden={false}
+          items={[
           {
             key: 'normal',
             label: 'Normal Mode',
@@ -199,7 +198,12 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                         onChange={(value) => {
                           const models = getModelOptions(value);
                           if (models.length > 0) {
-                            normalForm.setFieldValue('model', models[0]);
+                            normalForm.setFieldValue('model', [models[0]]);
+                          }
+                          // Update Base URL when provider changes
+                          const defaultBaseURL = getDefaultBaseURL(value);
+                          if (defaultBaseURL) {
+                            normalForm.setFieldValue('baseURL', defaultBaseURL);
                           }
                         }}
                       />
@@ -493,7 +497,8 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
             ),
           },
         ]}
-      />
+        />
+      )}
     </Modal>
   );
 };

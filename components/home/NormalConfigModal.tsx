@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Modal, Form, Select, Input, InputNumber, Checkbox, Space, Typography, Collapse, Row, Col } from 'antd';
+import { getModelOptions, getDefaultBaseURL } from './llmProviderUtils';
 
 const { Text } = Typography;
 
@@ -74,20 +75,6 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
     onCancel();
   };
 
-  // Get common models based on provider
-  const getModelOptions = (provider: LLMProvider) => {
-    const modelsByProvider: Record<LLMProvider, string[]> = {
-      'openai': ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-      'anthropic': ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229'],
-      'google': ['gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash'],
-      'aws': ['anthropic.claude-v2', 'anthropic.claude-instant-v1'],
-      'openrouter': ['openai/gpt-5-nano', 'anthropic/claude-sonnet-4.5', 'openai/gpt-5.1'],
-      'openai-compatible': [],
-      'modelscope': [],
-    };
-    return modelsByProvider[provider] || [];
-  };
-
   const providerOptions = [
     { value: 'openai', label: 'OpenAI' },
     { value: 'anthropic', label: 'Anthropic' },
@@ -144,7 +131,12 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
                 onChange={(value) => {
                   const models = getModelOptions(value);
                   if (models.length > 0) {
-                    form.setFieldValue('model', models[0]);
+                    form.setFieldValue('model', [models[0]]);
+                  }
+                  // Update Base URL when provider changes
+                  const defaultBaseURL = getDefaultBaseURL(value);
+                  if (defaultBaseURL) {
+                    form.setFieldValue('baseURL', defaultBaseURL);
                   }
                 }}
               />
