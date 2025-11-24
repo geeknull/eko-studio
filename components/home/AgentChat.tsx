@@ -5,26 +5,20 @@ import { Card, Avatar, Spin, message } from 'antd'
 import { Bubble, Sender, XProvider } from '@ant-design/x'
 import { RobotOutlined } from '@ant-design/icons'
 import { useChatStore, ChatMessage } from '@/store/chatStore'
+import { useConfigStore } from '@/store'
 import { useSSE } from '@/hooks/useSSE'
 import { useMessageItems } from '@/hooks/useMessageItems'
-import { NormalConfig } from './NormalConfigModal'
-import { ReplayConfig } from './ReplayConfigModal'
 
 interface AgentChatProps {
-  mode: 'normal' | 'replay'
-  normalConfig: NormalConfig | null
-  replayConfig: ReplayConfig
   onViewJson: (message: ChatMessage) => void
   onConfigRequired?: () => void
 }
 
 export const AgentChat: React.FC<AgentChatProps> = ({
-  mode,
-  normalConfig,
-  replayConfig,
   onViewJson,
   onConfigRequired,
 }) => {
+  const { mode, normalConfig, replayConfig } = useConfigStore()
   const {
     messages,
     isLoading,

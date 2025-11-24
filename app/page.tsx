@@ -4,10 +4,9 @@ import React from 'react'
 import { ConfigProvider, Layout, Typography, message } from 'antd'
 import { RobotOutlined } from '@ant-design/icons'
 import { ChatMessage } from '@/store/chatStore'
+import { useConfigStore } from '@/store'
 import { JsonViewModal } from '@/components/base/JsonViewModal'
 import { ConfigModal } from '@/components/home/ConfigModal'
-import { ReplayConfig } from '@/components/home/ReplayConfigModal'
-import { NormalConfig } from '@/components/home/NormalConfigModal'
 import { HeaderControls } from '@/components/home/HeaderControls'
 import { AgentChat } from '@/components/home/AgentChat'
 
@@ -16,14 +15,8 @@ const { Title } = Typography
 
 function App() {
   const [selectedMessage, setSelectedMessage] = React.useState<ChatMessage | null>(null)
-  const [mode, setMode] = React.useState<'normal' | 'replay'>('normal')
   const [showConfig, setShowConfig] = React.useState(false)
-  const [replayConfig, setReplayConfig] = React.useState<ReplayConfig>({
-    playbackMode: 'realtime',
-    speed: 1.0,
-    fixedInterval: 100,
-  })
-  const [normalConfig, setNormalConfig] = React.useState<NormalConfig | null>(null)
+  const { mode, setMode } = useConfigStore()
 
   // Callback for viewing JSON
   const handleViewJson = React.useCallback((message: ChatMessage) => {
@@ -42,16 +35,10 @@ function App() {
   }
 
   // Handle unified config confirm
-  const handleConfigConfirm = (
-    selectedMode: 'normal' | 'replay',
-    normalConfigResult: NormalConfig | null,
-    replayConfigResult: ReplayConfig
-  ) => {
-    setMode(selectedMode)
-    setNormalConfig(normalConfigResult)
-    setReplayConfig(replayConfigResult)
+  const handleConfigConfirm = () => {
     setShowConfig(false)
-    message.success(`${selectedMode === 'normal' ? 'Normal' : 'Replay'} mode configuration saved`)
+    const currentMode = useConfigStore.getState().mode
+    message.success(`${currentMode === 'normal' ? 'Normal' : 'Replay'} mode configuration saved`)
   }
 
   // Handle config cancel
@@ -84,9 +71,6 @@ function App() {
         </Header>
         <Content className="flex-1 flex flex-col overflow-hidden p-6 min-h-0" style={{ minHeight: 0 }}>
           <AgentChat
-            mode={mode}
-            normalConfig={normalConfig}
-            replayConfig={replayConfig}
             onViewJson={handleViewJson}
             onConfigRequired={() => setShowConfig(true)}
           />
@@ -103,9 +87,6 @@ function App() {
       {/* Unified Config Modal */}
       <ConfigModal
         open={showConfig}
-        currentMode={mode}
-        normalConfig={normalConfig}
-        replayConfig={replayConfig}
         onConfirm={handleConfigConfirm}
         onCancel={handleConfigCancel}
       />

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { Modal, Tabs, Form, Select, Input, InputNumber, Checkbox, Space, Typography, Collapse, Row, Col } from 'antd'
+import { useConfigStore } from '@/store'
 import { ReplayConfig } from './ReplayConfigModal'
 import { NormalConfig, LLMProvider } from './NormalConfigModal'
 
@@ -9,21 +10,16 @@ const { Text } = Typography
 
 interface ConfigModalProps {
   open: boolean
-  currentMode: 'normal' | 'replay'
-  normalConfig: NormalConfig | null
-  replayConfig: ReplayConfig
-  onConfirm: (mode: 'normal' | 'replay', normalConfig: NormalConfig | null, replayConfig: ReplayConfig) => void
+  onConfirm: () => void
   onCancel: () => void
 }
 
 export const ConfigModal: React.FC<ConfigModalProps> = ({
   open,
-  currentMode,
-  normalConfig,
-  replayConfig,
   onConfirm,
   onCancel,
 }) => {
+  const { mode: currentMode, normalConfig, replayConfig, updateConfig } = useConfigStore()
   const [normalForm] = Form.useForm()
   const [replayForm] = Form.useForm()
   const [activeTab, setActiveTab] = React.useState<'normal' | 'replay'>(currentMode)
@@ -120,7 +116,8 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
         fixedInterval: replayValues.fixedInterval || replayConfig.fixedInterval,
       }
 
-      onConfirm(activeTab, normalConfigResult, replayConfigResult)
+      updateConfig(activeTab, normalConfigResult, replayConfigResult)
+      onConfirm()
     })
   }
 
