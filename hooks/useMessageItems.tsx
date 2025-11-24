@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import React from 'react'
-import { Avatar, Tag, Button, Space } from 'antd'
-import { UserOutlined, RobotOutlined, EyeOutlined } from '@ant-design/icons'
-import { ChatMessage } from '@/store/chatStore'
-import { StreamCallbackMessage } from '@/types'
-import { MessageRenderer } from '@/components/messageRenderer'
+import React from 'react';
+import { Avatar, Tag, Button, Space } from 'antd';
+import { UserOutlined, RobotOutlined, EyeOutlined } from '@ant-design/icons';
+import { ChatMessage } from '@/store/chatStore';
+import { StreamCallbackMessage } from '@/types';
+import { MessageRenderer } from '@/components/messageRenderer';
 
 interface UseMessageItemsOptions {
   onViewJson?: (message: ChatMessage) => void
@@ -13,11 +13,11 @@ interface UseMessageItemsOptions {
 
 export const useMessageItems = (
   messages: ChatMessage[],
-  options?: UseMessageItemsOptions
+  options?: UseMessageItemsOptions,
 ) => {
-  const { onViewJson } = options || {}
+  const { onViewJson } = options || {};
 
-  return React.useMemo(() => messages.map((message) => ({
+  return React.useMemo(() => messages.map(message => ({
     key: message.id,
     role: message.role,
     content: message.content,
@@ -26,19 +26,24 @@ export const useMessageItems = (
       ? (content: any) => <MessageRenderer content={content as StreamCallbackMessage} />
       : undefined,
     footer: (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: '4px'
-      }}>
+        marginTop: '4px',
+      }}
+      >
         <Space size="small">
           <Tag color="default" style={{ margin: 0, fontSize: '11px', padding: '2px 8px' }}>
-            Sequence: {message.id}
+            Sequence:
+            {' '}
+            {message.id}
           </Tag>
           {message.repeat && message.repeat > 1 && (
             <Tag color="processing" style={{ margin: 0, fontSize: '11px', padding: '2px 8px' }}>
-              × {message.repeat}
+              ×
+              {' '}
+              {message.repeat}
             </Tag>
           )}
         </Space>
@@ -61,5 +66,5 @@ export const useMessageItems = (
         paddingTop: 0,
       },
     },
-  })), [messages, onViewJson])
-}
+  })), [messages, onViewJson]);
+};

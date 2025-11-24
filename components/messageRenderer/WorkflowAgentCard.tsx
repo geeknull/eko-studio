@@ -1,33 +1,33 @@
-import React from 'react'
-import { Tag, Typography, Space, Collapse, Card } from 'antd'
-import { LazySyntaxHighlighter } from '../base/LazySyntaxHighlighter'
-import type { WorkflowAgent, WorkflowNode, WorkflowTextNode, WorkflowForEachNode, WorkflowWatchNode } from '../../types'
+import React from 'react';
+import { Tag, Typography, Space, Collapse, Card } from 'antd';
+import { LazySyntaxHighlighter } from '../base/LazySyntaxHighlighter';
+import type { WorkflowAgent, WorkflowNode, WorkflowTextNode, WorkflowForEachNode, WorkflowWatchNode } from '../../types';
 
-const { Text, Paragraph } = Typography
+const { Text, Paragraph } = Typography;
 
 // Component for rendering a single node
 export const NodeRenderer: React.FC<{
-  node: WorkflowNode;
-  level?: number;
-  isSequential?: boolean;
-  index?: number;
-  showConnector?: boolean;
-  parentIndex?: string;
+  node: WorkflowNode
+  level?: number
+  isSequential?: boolean
+  index?: number
+  showConnector?: boolean
+  parentIndex?: string
 }> = ({ node, level = 0, isSequential = false, index, showConnector = false, parentIndex }) => {
-  const indent = level * 16
+  const indent = level * 16;
 
   // Generate display index: if parent index exists, use "parent.child" format, otherwise use single number
   const displayIndex = parentIndex && index !== undefined
     ? `${parentIndex}.${index + 1}`
     : index !== undefined
       ? `${index + 1}`
-      : undefined
+      : undefined;
 
   // Determine if it's a single digit (used to decide whether to show circle or rounded rectangle)
-  const isSingleDigit = displayIndex && !displayIndex.includes('.')
+  const isSingleDigit = displayIndex && !displayIndex.includes('.');
 
   if (node.type === 'normal') {
-    const normalNode = node as WorkflowTextNode
+    const normalNode = node as WorkflowTextNode;
     return (
       <div style={{ position: 'relative' }}>
         {showConnector && (
@@ -37,8 +37,9 @@ export const NodeRenderer: React.FC<{
             top: '-8px',
             bottom: '8px',
             width: '2px',
-            backgroundColor: '#d9d9d9'
-          }} />
+            backgroundColor: '#d9d9d9',
+          }}
+          />
         )}
         <div style={{ marginLeft: `${indent}px`, marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
           {isSequential && displayIndex && (
@@ -54,8 +55,9 @@ export const NodeRenderer: React.FC<{
               fontSize: isSingleDigit ? '12px' : '11px',
               fontWeight: 'bold',
               zIndex: 1,
-              padding: isSingleDigit ? '0' : '0 6px'
-            }}>
+              padding: isSingleDigit ? '0' : '0 6px',
+            }}
+            >
               {displayIndex}
             </div>
           )}
@@ -79,11 +81,11 @@ export const NodeRenderer: React.FC<{
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (node.type === 'forEach') {
-    const forEachNode = node as WorkflowForEachNode
+    const forEachNode = node as WorkflowForEachNode;
     return (
       <div style={{ position: 'relative' }}>
         {showConnector && (
@@ -93,8 +95,9 @@ export const NodeRenderer: React.FC<{
             top: '-8px',
             bottom: '8px',
             width: '2px',
-            backgroundColor: '#d9d9d9'
-          }} />
+            backgroundColor: '#d9d9d9',
+          }}
+          />
         )}
         <div style={{ marginLeft: `${indent}px`, marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
           {isSequential && displayIndex && (
@@ -110,8 +113,9 @@ export const NodeRenderer: React.FC<{
               fontSize: isSingleDigit ? '12px' : '11px',
               fontWeight: 'bold',
               zIndex: 1,
-              padding: isSingleDigit ? '0' : '0 6px'
-            }}>
+              padding: isSingleDigit ? '0' : '0 6px',
+            }}
+            >
               {displayIndex}
             </div>
           )}
@@ -120,8 +124,9 @@ export const NodeRenderer: React.FC<{
               padding: '8px',
               border: '1px solid #d9d9d9',
               borderRadius: '4px',
-              backgroundColor: '#fafafa'
-            }}>
+              backgroundColor: '#fafafa',
+            }}
+            >
               <div>
                 <Tag color="blue">forEach</Tag>
                 <Text type="secondary">items: </Text>
@@ -149,11 +154,11 @@ export const NodeRenderer: React.FC<{
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (node.type === 'watch') {
-    const watchNode = node as WorkflowWatchNode
+    const watchNode = node as WorkflowWatchNode;
     return (
       <div style={{ position: 'relative' }}>
         {showConnector && (
@@ -163,8 +168,9 @@ export const NodeRenderer: React.FC<{
             top: '-8px',
             bottom: '8px',
             width: '2px',
-            backgroundColor: '#d9d9d9'
-          }} />
+            backgroundColor: '#d9d9d9',
+          }}
+          />
         )}
         <div style={{ marginLeft: `${indent}px`, marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
           {isSequential && displayIndex && (
@@ -180,8 +186,9 @@ export const NodeRenderer: React.FC<{
               fontSize: isSingleDigit ? '12px' : '11px',
               fontWeight: 'bold',
               zIndex: 1,
-              padding: isSingleDigit ? '0' : '0 6px'
-            }}>
+              padding: isSingleDigit ? '0' : '0 6px',
+            }}
+            >
               {displayIndex}
             </div>
           )}
@@ -190,8 +197,9 @@ export const NodeRenderer: React.FC<{
               padding: '8px',
               border: '1px solid #d9d9d9',
               borderRadius: '4px',
-              backgroundColor: '#fafafa'
-            }}>
+              backgroundColor: '#fafafa',
+            }}
+            >
               <div>
                 <Tag color="orange">watch</Tag>
                 <Text type="secondary">event: </Text>
@@ -225,17 +233,17 @@ export const NodeRenderer: React.FC<{
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div style={{ marginLeft: `${indent}px`, marginBottom: '8px' }}>
       <Text type="secondary">{JSON.stringify(node)}</Text>
     </div>
-  )
-}
+  );
+};
 
-NodeRenderer.displayName = 'NodeRenderer'
+NodeRenderer.displayName = 'NodeRenderer';
 
 interface WorkflowAgentCardProps {
   agent: WorkflowAgent
@@ -245,25 +253,29 @@ interface WorkflowAgentCardProps {
 /**
  * WorkflowAgent Card Component - Used to render detailed information of a single agent
  */
-export const WorkflowAgentCard: React.FC<WorkflowAgentCardProps> = React.memo(({ 
-  agent, 
-  agentsMap 
+export const WorkflowAgentCard: React.FC<WorkflowAgentCardProps> = React.memo(({
+  agent,
+  agentsMap,
 }) => {
-  const [agentXmlExpanded, setAgentXmlExpanded] = React.useState<string[]>([])
-  const agentXmlKey = `agent-${agent.id}-xml`
+  const [agentXmlExpanded, setAgentXmlExpanded] = React.useState<string[]>([]);
+  const agentXmlKey = `agent-${agent.id}-xml`;
 
   return (
     <Card
       size="small"
-      title={
+      title={(
         <Space>
           <Text strong>{agent.name}</Text>
           <Tag color={
-            agent.status === 'done' ? 'success' :
-            agent.status === 'running' ? 'processing' :
-            agent.status === 'error' ? 'error' :
-            'default'
-          }>
+            agent.status === 'done'
+              ? 'success'
+              : agent.status === 'running'
+                ? 'processing'
+                : agent.status === 'error'
+                  ? 'error'
+                  : 'default'
+          }
+          >
             {agent.status}
           </Tag>
           {agent.parallel !== undefined && (
@@ -272,7 +284,7 @@ export const WorkflowAgentCard: React.FC<WorkflowAgentCardProps> = React.memo(({
             </Tag>
           )}
         </Space>
-      }
+      )}
       style={{ width: '100%' }}
     >
       <Space orientation="vertical" size="small" style={{ width: '100%' }}>
@@ -280,41 +292,44 @@ export const WorkflowAgentCard: React.FC<WorkflowAgentCardProps> = React.memo(({
           <Text type="secondary">id: </Text>
           <Text copyable>{agent.id}</Text>
         </div>
-        
+
         {agent.dependsOn && agent.dependsOn.length > 0 && (
           <div>
             <Text type="secondary">dependsOn: </Text>
             <Space size="small" wrap>
               {agent.dependsOn.map((dep, idx) => {
-                const depAgent = agentsMap?.get(dep)
+                const depAgent = agentsMap?.get(dep);
                 return (
                   <Tag key={idx}>
-                    {dep}{depAgent ? ` (${depAgent.name})` : ''}
+                    {dep}
+                    {depAgent ? ` (${depAgent.name})` : ''}
                   </Tag>
-                )
+                );
               })}
             </Space>
           </div>
         )}
-        
+
         <div>
           <Text type="secondary">task:</Text>
           <Paragraph style={{ margin: '4px 0', whiteSpace: 'pre-wrap' }}>
             {agent.task}
           </Paragraph>
         </div>
-        
+
         {agent.nodes && agent.nodes.length > 0 && (
           <div>
             <Text type="secondary">
-              nodes ({agent.nodes.length})
+              nodes (
+              {agent.nodes.length}
+              )
               {agent.parallel === false && <Text type="secondary" style={{ fontSize: '12px', marginLeft: '8px' }}>(sequential execution)</Text>}
             </Text>
             <div style={{ marginTop: '8px' }}>
               {agent.nodes.map((node, nodeIdx) => (
-                <NodeRenderer 
-                  key={nodeIdx} 
-                  node={node} 
+                <NodeRenderer
+                  key={nodeIdx}
+                  node={node}
                   isSequential={agent.parallel === false}
                   index={nodeIdx}
                   showConnector={agent.parallel === false && nodeIdx > 0}
@@ -323,14 +338,14 @@ export const WorkflowAgentCard: React.FC<WorkflowAgentCardProps> = React.memo(({
             </div>
           </div>
         )}
-        
+
         {agent.xml && (
           <div>
             <Collapse
               size="small"
               ghost
               activeKey={agentXmlExpanded}
-              onChange={(keys) => setAgentXmlExpanded(keys as string[])}
+              onChange={keys => setAgentXmlExpanded(keys as string[])}
               items={[
                 {
                   key: agentXmlKey,
@@ -344,16 +359,15 @@ export const WorkflowAgentCard: React.FC<WorkflowAgentCardProps> = React.memo(({
                         {agent.xml}
                       </LazySyntaxHighlighter>
                     </div>
-                  )
-                }
+                  ),
+                },
               ]}
             />
           </div>
         )}
       </Space>
     </Card>
-  )
-})
+  );
+});
 
-WorkflowAgentCard.displayName = 'WorkflowAgentCard'
-
+WorkflowAgentCard.displayName = 'WorkflowAgentCard';

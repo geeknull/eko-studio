@@ -1,13 +1,13 @@
-"use client"
+'use client';
 
-import React from 'react'
-import { Card, Avatar, Spin, message } from 'antd'
-import { Bubble, Sender, XProvider } from '@ant-design/x'
-import { RobotOutlined } from '@ant-design/icons'
-import { useChatStore, ChatMessage } from '@/store/chatStore'
-import { useConfigStore } from '@/store'
-import { useSSE } from '@/hooks/useSSE'
-import { useMessageItems } from '@/hooks/useMessageItems'
+import React from 'react';
+import { Card, Avatar, Spin, message } from 'antd';
+import { Bubble, Sender, XProvider } from '@ant-design/x';
+import { RobotOutlined } from '@ant-design/icons';
+import { useChatStore, ChatMessage } from '@/store/chatStore';
+import { useConfigStore } from '@/store';
+import { useSSE } from '@/hooks/useSSE';
+import { useMessageItems } from '@/hooks/useMessageItems';
 
 interface AgentChatProps {
   onViewJson: (message: ChatMessage) => void
@@ -18,58 +18,58 @@ export const AgentChat: React.FC<AgentChatProps> = ({
   onViewJson,
   onConfigRequired,
 }) => {
-  const { mode, normalConfig, replayConfig } = useConfigStore()
+  const { mode, normalConfig, replayConfig } = useConfigStore();
   const {
     messages,
     isLoading,
     addUserMessage,
     addAssistantMessage,
     setLoading,
-  } = useChatStore()
-  const [inputValue, setInputValue] = React.useState('')
+  } = useChatStore();
+  const [inputValue, setInputValue] = React.useState('');
 
   // Use SSE Hook
   const { isConnected, connect, disconnect } = useSSE({
     url: '', // Dynamic connection, initially empty
     onDisconnect: () => {
-      setLoading(false)
+      setLoading(false);
     },
     onError: (error) => {
-      setLoading(false)
-      console.error('SSE Error:', error)
-      message.error('Connection interrupted, please retry')
+      setLoading(false);
+      console.error('SSE Error:', error);
+      message.error('Connection interrupted, please retry');
     },
-  })
+  });
 
   // Use useMessageItems Hook to generate message list items
-  const messageItems = useMessageItems(messages, { onViewJson })
+  const messageItems = useMessageItems(messages, { onViewJson });
 
   const handleSend = async () => {
-    if (!inputValue.trim()) return
+    if (!inputValue.trim()) return;
 
     // Check if normal mode requires config
     if (mode === 'normal' && !normalConfig) {
-      message.warning('Please configure Normal mode parameters first')
-      onConfigRequired?.()
-      return
+      message.warning('Please configure Normal mode parameters first');
+      onConfigRequired?.();
+      return;
     }
 
-    const userMessage = inputValue.trim()
+    const userMessage = inputValue.trim();
 
     // Add user message
-    addUserMessage(userMessage)
-    setInputValue('')
+    addUserMessage(userMessage);
+    setInputValue('');
 
     // Set loading state
-    setLoading(true)
+    setLoading(true);
 
     try {
       // 1. Call API to start Agent
-      const requestBody: Record<string, unknown> = { query: userMessage }
+      const requestBody: Record<string, unknown> = { query: userMessage };
 
       // Add normal config if in normal mode
       if (mode === 'normal' && normalConfig) {
-        requestBody.normalConfig = normalConfig
+        requestBody.normalConfig = normalConfig;
       }
 
       const response = await fetch('/api/agent/start', {
@@ -78,48 +78,51 @@ export const AgentChat: React.FC<AgentChatProps> = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
+        throw new Error(`API error: ${response.status}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success && data.data && data.data.taskId) {
-        const taskId = data.data.taskId
+        const taskId = data.data.taskId;
 
         // 2. Use returned taskId to establish SSE connection
         // If already connected, disconnect first
         if (isConnected) {
-          disconnect()
+          disconnect();
         }
 
         // Build SSE URL with mode and replay parameters
-        let sseUrl = `/api/agent/stream/${taskId}?mode=${mode}`
+        let sseUrl = `/api/agent/stream/${taskId}?mode=${mode}`;
 
         if (mode === 'replay') {
-          sseUrl += `&playbackMode=${replayConfig.playbackMode}`
+          sseUrl += `&playbackMode=${replayConfig.playbackMode}`;
           if (replayConfig.playbackMode === 'realtime') {
-            sseUrl += `&speed=${replayConfig.speed}`
-          } else {
-            sseUrl += `&fixedInterval=${replayConfig.fixedInterval}`
+            sseUrl += `&speed=${replayConfig.speed}`;
+          }
+          else {
+            sseUrl += `&fixedInterval=${replayConfig.fixedInterval}`;
           }
         }
 
         // Connect to new SSE stream
-        connect(sseUrl)
-      } else {
-        throw new Error('Invalid response format: missing taskId')
+        connect(sseUrl);
       }
-    } catch (error) {
-      console.error('Failed to start agent:', error)
-      setLoading(false)
-      addAssistantMessage(
-        `Error: Failed to start agent. ${error instanceof Error ? error.message : String(error)}`
-      )
+      else {
+        throw new Error('Invalid response format: missing taskId');
+      }
     }
-  }
+    catch (error) {
+      console.error('Failed to start agent:', error);
+      setLoading(false);
+      addAssistantMessage(
+        `Error: Failed to start agent. ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  };
 
   return (
     <XProvider>
@@ -136,18 +139,20 @@ export const AgentChat: React.FC<AgentChatProps> = ({
           },
         }}
       >
-        {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-400 p-4">
-            No messages yet, start chatting!
-          </div>
-        ) : (
-          <Bubble.List
-            className="flex-1 overflow-y-auto p-4"
-            style={{ minHeight: 0 }}
-            autoScroll
-            items={messageItems}
-          />
-        )}
+        {messages.length === 0
+          ? (
+            <div className="flex items-center justify-center h-full text-gray-400 p-4">
+              No messages yet, start chatting!
+            </div>
+          )
+          : (
+            <Bubble.List
+              className="flex-1 overflow-y-auto p-4"
+              style={{ minHeight: 0 }}
+              autoScroll
+              items={messageItems}
+            />
+          )}
         {isLoading && (
           <div className="flex justify-start gap-3 p-4 border-t">
             <Avatar icon={<RobotOutlined />} />
@@ -162,13 +167,13 @@ export const AgentChat: React.FC<AgentChatProps> = ({
             onChange={setInputValue}
             onSubmit={(message) => {
               if (message.trim()) {
-                handleSend()
+                handleSend();
               }
             }}
             onCancel={() => {
               if (isLoading) {
                 // Handle cancel/stop logic here if needed
-                setLoading(false)
+                setLoading(false);
               }
             }}
             placeholder="Type a message..."
@@ -180,6 +185,5 @@ export const AgentChat: React.FC<AgentChatProps> = ({
         </div>
       </Card>
     </XProvider>
-  )
-}
-
+  );
+};

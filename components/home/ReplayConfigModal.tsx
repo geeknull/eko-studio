@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
-import React from 'react'
-import { Modal, Form, Select, InputNumber, Space, Typography } from 'antd'
+import React from 'react';
+import { Modal, Form, Select, InputNumber, Space, Typography } from 'antd';
 
-const { Text } = Typography
+const { Text } = Typography;
 
 export interface ReplayConfig {
   playbackMode: 'realtime' | 'fixed'
@@ -22,20 +22,20 @@ export const ReplayConfigModal: React.FC<ReplayConfigModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const [form] = Form.useForm()
-  const [playbackMode, setPlaybackMode] = React.useState<'realtime' | 'fixed'>('realtime')
+  const [form] = Form.useForm();
+  const [playbackMode, setPlaybackMode] = React.useState<'realtime' | 'fixed'>('realtime');
 
   const handleOk = () => {
     form.validateFields().then((values) => {
-      onConfirm(values as ReplayConfig)
-      form.resetFields()
-    })
-  }
+      onConfirm(values as ReplayConfig);
+      form.resetFields();
+    });
+  };
 
   const handleCancel = () => {
-    form.resetFields()
-    onCancel()
-  }
+    form.resetFields();
+    onCancel();
+  };
 
   return (
     <Modal
@@ -62,7 +62,7 @@ export const ReplayConfigModal: React.FC<ReplayConfigModalProps> = ({
           rules={[{ required: true, message: 'Please select playback mode' }]}
         >
           <Select
-            onChange={(value) => setPlaybackMode(value)}
+            onChange={value => setPlaybackMode(value)}
             options={[
               { value: 'realtime', label: 'Realtime - Play with original time intervals' },
               { value: 'fixed', label: 'Fixed - Play with fixed time intervals' },
@@ -73,14 +73,14 @@ export const ReplayConfigModal: React.FC<ReplayConfigModalProps> = ({
         {playbackMode === 'realtime' && (
           <Form.Item
             name="speed"
-            label={
+            label={(
               <Space>
                 <span>Playback Speed</span>
                 <Text type="secondary" style={{ fontSize: '12px' }}>
                   (0.1 - 100x)
                 </Text>
               </Space>
-            }
+            )}
             rules={[
               { required: true, message: 'Please enter playback speed' },
               { type: 'number', min: 0.1, max: 100, message: 'Speed must be between 0.1 and 100' },
@@ -100,14 +100,14 @@ export const ReplayConfigModal: React.FC<ReplayConfigModalProps> = ({
         {playbackMode === 'fixed' && (
           <Form.Item
             name="fixedInterval"
-            label={
+            label={(
               <Space>
                 <span>Fixed Interval</span>
                 <Text type="secondary" style={{ fontSize: '12px' }}>
                   (10 - 60000 ms)
                 </Text>
               </Space>
-            }
+            )}
             rules={[
               { required: true, message: 'Please enter fixed interval' },
               { type: 'number', min: 10, max: 60000, message: 'Interval must be between 10 and 60000 ms' },
@@ -127,13 +127,20 @@ export const ReplayConfigModal: React.FC<ReplayConfigModalProps> = ({
           <Text type="secondary" style={{ fontSize: '12px' }}>
             <strong>Description:</strong>
             <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
-              <li><strong>Realtime Mode:</strong> Play with original time intervals recorded in logs, can be accelerated or decelerated via speed parameter</li>
-              <li><strong>Fixed Mode:</strong> Play each message with fixed time intervals, ignoring original timestamps</li>
+              <li>
+                <strong>Realtime Mode:</strong>
+                {' '}
+                Play with original time intervals recorded in logs, can be accelerated or decelerated via speed parameter
+              </li>
+              <li>
+                <strong>Fixed Mode:</strong>
+                {' '}
+                Play each message with fixed time intervals, ignoring original timestamps
+              </li>
             </ul>
           </Text>
         </div>
       </Form>
     </Modal>
-  )
-}
-
+  );
+};

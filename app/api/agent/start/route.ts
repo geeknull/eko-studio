@@ -7,7 +7,7 @@ import type { AgentStartResponse } from '@/app/api/agent/types';
  * GET /api/agent/start?query=your_question
  * GET /api/agent/start?q=your_question
  * POST /api/agent/start with JSON body
- * 
+ *
  * Starts an agent task and returns a task ID for SSE streaming
  */
 
@@ -16,7 +16,7 @@ import type { AgentStartResponse } from '@/app/api/agent/types';
  */
 async function processAgentStart(
   query: string,
-  params?: Record<string, unknown>
+  params?: Record<string, unknown>,
 ): Promise<Response> {
   // Validate query content (allow empty string)
   if (query && query.trim().length > 0) {
@@ -28,21 +28,21 @@ async function processAgentStart(
           error: validation.error,
           timestamp: new Date().toISOString(),
         } as AgentStartResponse,
-        { status: 400 }
+        { status: 400 },
       );
     }
   }
-  
+
   // Start agent task and get task ID (use empty string if query is not provided)
   const result = await agentStart(query || '', params);
-  
+
   return NextResponse.json(
     {
       success: true,
       data: result,
       timestamp: new Date().toISOString(),
     } as AgentStartResponse,
-    { status: 200 }
+    { status: 200 },
   );
 }
 
@@ -51,14 +51,14 @@ async function processAgentStart(
  */
 function errorResponse(error: unknown, method: string): Response {
   console.error(`Agent Start API Error (${method}):`, error);
-  
+
   return NextResponse.json(
     {
       success: false,
       error: error instanceof Error ? error.message : 'Internal server error',
       timestamp: new Date().toISOString(),
     } as AgentStartResponse,
-    { status: 500 }
+    { status: 500 },
   );
 }
 
@@ -72,7 +72,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     // Support both 'query' and 'q' as aliases, default to empty string if not provided
     const query = searchParams.get('query') || searchParams.get('q') || '';
-    
+
     // Extract other parameters from query string
     const params: Record<string, unknown> = {};
     searchParams.forEach((value, key) => {
@@ -80,9 +80,10 @@ export async function GET(request: Request) {
         params[key] = value;
       }
     });
-    
+
     return await processAgentStart(query, Object.keys(params).length > 0 ? params : undefined);
-  } catch (error) {
+  }
+  catch (error) {
     return errorResponse(error, 'GET');
   }
 }
@@ -94,17 +95,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    
+
     // Use empty string as default if query is not provided
     const query = body.query || '';
-    
+
     // Extract external parameters (everything except query)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { query: _, ...params } = body;
-    
+
     return await processAgentStart(query, params);
-  } catch (error) {
+  }
+  catch (error) {
     return errorResponse(error, 'POST');
   }
 }
-

@@ -3,13 +3,12 @@
  */
 
 export interface AgentStartResponse {
-  success: boolean;
+  success: boolean
   data?: {
-    taskId: string;
-    query: string;
-    sseUrl: string;
-  };
-  error?: string;
-  timestamp: string;
+    taskId: string
+    query: string
+    sseUrl: string
+  }
+  error?: string
+  timestamp: string
 }
-

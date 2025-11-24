@@ -23,16 +23,16 @@ function formatSSEMessage(eventType: SSEEventType, data: unknown): string {
  * Task information
  */
 export interface TaskInfo {
-  query: string;
-  params?: Record<string, unknown>;
+  query: string
+  params?: Record<string, unknown>
 }
 
 /**
  * Run handler options
  */
 export interface RunHandlerOptions {
-  taskId: string;
-  task: TaskInfo;
+  taskId: string
+  task: TaskInfo
 }
 
 /**
@@ -42,7 +42,7 @@ export interface RunHandlerOptions {
 export async function handleRun(
   controller: ReadableStreamDefaultController<Uint8Array>,
   encoder: TextEncoder,
-  options: RunHandlerOptions
+  options: RunHandlerOptions,
 ): Promise<void> {
   const { taskId, task } = options;
 
@@ -53,23 +53,25 @@ export async function handleRun(
     onMessage: async (message: StreamCallbackMessage) => {
       try {
         // Send agent message via SSE
-        console.log("eko-message: ", JSON.stringify(message, null, 2));
+        console.log('eko-message: ', JSON.stringify(message, null, 2));
         const time = new Date();
         controller.enqueue(
           encoder.encode(formatSSEMessage('message', {
             time: time.toISOString(),
             timestamp: time.getTime(),
-            content: message
-          }))
+            content: message,
+          })),
         );
-      } catch (error) {
+      }
+      catch (error) {
         // Check for invalid state error which indicates stream closure
         if (error instanceof TypeError && (
-          error.message.includes('Invalid state') || 
-          error.message.includes('Controller is already closed')
+          error.message.includes('Invalid state')
+          || error.message.includes('Controller is already closed')
         )) {
           console.warn('[Run Handler] SSE connection closed by client');
-        } else {
+        }
+        else {
           console.error('[Run Handler] Error sending SSE message:', error);
         }
       }
@@ -78,7 +80,7 @@ export async function handleRun(
 
   // Extract normalConfig from params if present
   const normalConfig = task.params?.normalConfig as Record<string, unknown> | undefined;
-  
+
   // Run agent
   await run({
     query: task.query,
@@ -94,8 +96,8 @@ export async function handleRun(
         taskId,
         status: 'completed',
         message: 'Agent execution completed',
-      })
-    )
+      }),
+    ),
   );
 
   // Update task status
@@ -103,4 +105,3 @@ export async function handleRun(
 
   console.log('[Run Handler] Finished successfully');
 }
-

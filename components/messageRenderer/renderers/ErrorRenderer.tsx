@@ -1,10 +1,10 @@
-import React from 'react'
-import { Alert, Typography, Space, Collapse, Descriptions } from 'antd'
-import { CloseCircleOutlined, WarningOutlined } from '@ant-design/icons'
-import { LazySyntaxHighlighter } from '../../base/LazySyntaxHighlighter'
-import type { StreamCallbackMessage } from '../../../types'
+import React from 'react';
+import { Alert, Typography, Space, Collapse, Descriptions } from 'antd';
+import { CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
+import { LazySyntaxHighlighter } from '../../base/LazySyntaxHighlighter';
+import type { StreamCallbackMessage } from '../../../types';
 
-const { Text, Paragraph } = Typography
+const { Text, Paragraph } = Typography;
 
 interface ErrorRendererProps {
   content: StreamCallbackMessage & {
@@ -17,9 +17,9 @@ interface ErrorRendererProps {
  * error message renderer - renders error messages
  */
 export const ErrorRenderer: React.FC<ErrorRendererProps> = React.memo(({
-  content
+  content,
 }) => {
-  const { error, nodeId } = content
+  const { error, nodeId } = content;
 
   // Parse error information
   const errorInfo = React.useMemo(() => {
@@ -30,8 +30,8 @@ export const ErrorRenderer: React.FC<ErrorRendererProps> = React.memo(({
         message: error.message,
         name: error.name,
         stack: error.stack,
-        isError: true
-      }
+        isError: true,
+      };
     }
 
     // String error
@@ -39,42 +39,42 @@ export const ErrorRenderer: React.FC<ErrorRendererProps> = React.memo(({
       return {
         type: 'String',
         message: error,
-        isError: false
-      }
+        isError: false,
+      };
     }
 
     // Object error
     if (typeof error === 'object' && error !== null) {
-      const errorObj = error as any
+      const errorObj = error as any;
       return {
         type: 'Object',
         message: errorObj.message || errorObj.error || JSON.stringify(error),
         name: errorObj.name,
         code: errorObj.code,
         details: error,
-        isError: false
-      }
+        isError: false,
+      };
     }
 
     // Other types
     return {
       type: typeof error,
       message: String(error),
-      isError: false
-    }
-  }, [error])
+      isError: false,
+    };
+  }, [error]);
 
   return (
     <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
       {/* Error alert */}
       <Alert
-        title={
+        title={(
           <Space>
             <CloseCircleOutlined style={{ fontSize: '16px' }} />
             <Text strong>Error Occurred</Text>
           </Space>
-        }
-        description={
+        )}
+        description={(
           <Space orientation="vertical" size="small" style={{ width: '100%' }}>
             {errorInfo.name && errorInfo.name !== 'Error' && (
               <div>
@@ -82,7 +82,7 @@ export const ErrorRenderer: React.FC<ErrorRendererProps> = React.memo(({
                 <Text code>{errorInfo.name}</Text>
               </div>
             )}
-            
+
             <div>
               <Text strong>Message: </Text>
               <Paragraph style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
@@ -104,7 +104,7 @@ export const ErrorRenderer: React.FC<ErrorRendererProps> = React.memo(({
               </div>
             )}
           </Space>
-        }
+        )}
         type="error"
         showIcon
         icon={<WarningOutlined />}
@@ -112,55 +112,60 @@ export const ErrorRenderer: React.FC<ErrorRendererProps> = React.memo(({
 
       {/* Detailed info (collapsible) */}
       {(errorInfo.stack || errorInfo.details) && (
-        <Collapse 
-          size="small" 
+        <Collapse
+          size="small"
           ghost
           items={[
             // Stack Trace
-            ...(errorInfo.stack ? [{
-              key: 'stack',
-              label: <Text strong>Stack Trace</Text>,
-              children: (
-                <div style={{
-                  borderRadius: '4px',
-                  overflow: 'hidden',
-                  border: '1px solid #ffccc7'
-                }}>
-                  <LazySyntaxHighlighter
-                    language="text"
-                    shouldRender={true}
+            ...(errorInfo.stack
+              ? [{
+                key: 'stack',
+                label: <Text strong>Stack Trace</Text>,
+                children: (
+                  <div style={{
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    border: '1px solid #ffccc7',
+                  }}
                   >
-                    {errorInfo.stack}
-                  </LazySyntaxHighlighter>
-                </div>
-              )
-            }] : []),
-            
+                    <LazySyntaxHighlighter
+                      language="text"
+                      shouldRender={true}
+                    >
+                      {errorInfo.stack}
+                    </LazySyntaxHighlighter>
+                  </div>
+                ),
+              }]
+              : []),
+
             // Raw Error Object
-            ...(errorInfo.details ? [{
-              key: 'details',
-              label: <Text strong>Raw Error Data</Text>,
-              children: (
-                <div style={{
-                  borderRadius: '4px',
-                  overflow: 'hidden',
-                  border: '1px solid #ffccc7'
-                }}>
-                  <LazySyntaxHighlighter
-                    language="json"
-                    shouldRender={true}
+            ...(errorInfo.details
+              ? [{
+                key: 'details',
+                label: <Text strong>Raw Error Data</Text>,
+                children: (
+                  <div style={{
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    border: '1px solid #ffccc7',
+                  }}
                   >
-                    {JSON.stringify(errorInfo.details, null, 2)}
-                  </LazySyntaxHighlighter>
-                </div>
-              )
-            }] : [])
+                    <LazySyntaxHighlighter
+                      language="json"
+                      shouldRender={true}
+                    >
+                      {JSON.stringify(errorInfo.details, null, 2)}
+                    </LazySyntaxHighlighter>
+                  </div>
+                ),
+              }]
+              : []),
           ]}
         />
       )}
     </Space>
-  )
-})
+  );
+});
 
-ErrorRenderer.displayName = 'ErrorRenderer'
-
+ErrorRenderer.displayName = 'ErrorRenderer';

@@ -1,22 +1,22 @@
-import React from 'react'
-import { Tag, Typography } from 'antd'
-import { LoadingOutlined, CheckCircleOutlined } from '@ant-design/icons'
-import { MarkdownRenderer } from '../../base/MarkdownRenderer'
-import type { StreamCallbackMessage } from '../../../types'
+import React from 'react';
+import { Tag, Typography } from 'antd';
+import { LoadingOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { MarkdownRenderer } from '../../base/MarkdownRenderer';
+import type { StreamCallbackMessage } from '../../../types';
 
-const { Text } = Typography
+const { Text } = Typography;
 
 interface ThinkingRendererProps {
-  content: StreamCallbackMessage & { type: 'thinking' | 'text'; text: string }
+  content: StreamCallbackMessage & { type: 'thinking' | 'text', text: string }
 }
 
 /**
  * thinking/text message renderer - renders AI thinking process and text messages
  */
-export const ThinkingRenderer: React.FC<ThinkingRendererProps> = React.memo(({ 
-  content 
+export const ThinkingRenderer: React.FC<ThinkingRendererProps> = React.memo(({
+  content,
 }) => {
-  const { text, streamId, streamDone, nodeId, type } = content
+  const { text, streamId, streamDone, nodeId, type } = content;
 
   return (
     <div>
@@ -35,7 +35,7 @@ export const ThinkingRenderer: React.FC<ThinkingRendererProps> = React.memo(({
           </div>
         )}
         {streamDone !== undefined && (
-          <Tag 
+          <Tag
             color={streamDone ? 'success' : 'processing'}
             icon={streamDone ? <CheckCircleOutlined /> : <LoadingOutlined />}
           >
@@ -51,14 +51,14 @@ export const ThinkingRenderer: React.FC<ThinkingRendererProps> = React.memo(({
           border: '1px solid #e8e8e8',
           borderRadius: '4px',
           padding: '16px',
-          marginTop: '8px'
-        }}>
+          marginTop: '8px',
+        }}
+        >
           <MarkdownRenderer content={text} />
         </div>
       )}
     </div>
-  )
-})
+  );
+});
 
-ThinkingRenderer.displayName = 'ThinkingRenderer'
-
+ThinkingRenderer.displayName = 'ThinkingRenderer';

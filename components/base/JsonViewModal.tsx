@@ -1,7 +1,7 @@
-import React from 'react'
-import { Modal } from 'antd'
-import { ChatMessage } from '../../store/chatStore'
-import { LazySyntaxHighlighter } from './LazySyntaxHighlighter'
+import React from 'react';
+import { Modal } from 'antd';
+import { ChatMessage } from '../../store/chatStore';
+import { LazySyntaxHighlighter } from './LazySyntaxHighlighter';
 
 interface JsonViewModalProps {
   open: boolean
@@ -29,6 +29,5 @@ export const JsonViewModal: React.FC<JsonViewModalProps> = ({ open, message, onC
         </div>
       )}
     </Modal>
-  )
-}
-
+  );
+};

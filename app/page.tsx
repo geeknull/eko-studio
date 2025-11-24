@@ -1,55 +1,55 @@
-"use client"
+'use client';
 
-import React from 'react'
-import { ConfigProvider, Layout, Typography, message } from 'antd'
-import { RobotOutlined } from '@ant-design/icons'
-import { ChatMessage } from '@/store/chatStore'
-import { useConfigStore } from '@/store'
-import { JsonViewModal } from '@/components/base/JsonViewModal'
-import { ConfigModal } from '@/components/home/ConfigModal'
-import { HeaderControls } from '@/components/home/HeaderControls'
-import { AgentChat } from '@/components/home/AgentChat'
+import React from 'react';
+import { ConfigProvider, Layout, Typography, message } from 'antd';
+import { RobotOutlined } from '@ant-design/icons';
+import { ChatMessage } from '@/store/chatStore';
+import { useConfigStore } from '@/store';
+import { JsonViewModal } from '@/components/base/JsonViewModal';
+import { ConfigModal } from '@/components/home/ConfigModal';
+import { HeaderControls } from '@/components/home/HeaderControls';
+import { AgentChat } from '@/components/home/AgentChat';
 
-const { Header, Content } = Layout
-const { Title } = Typography
+const { Header, Content } = Layout;
+const { Title } = Typography;
 
 function App() {
-  const [selectedMessage, setSelectedMessage] = React.useState<ChatMessage | null>(null)
-  const [showConfig, setShowConfig] = React.useState(false)
-  const { mode, setMode } = useConfigStore()
+  const [selectedMessage, setSelectedMessage] = React.useState<ChatMessage | null>(null);
+  const [showConfig, setShowConfig] = React.useState(false);
+  const { mode, setMode } = useConfigStore();
 
   // Callback for viewing JSON
   const handleViewJson = React.useCallback((message: ChatMessage) => {
-    setSelectedMessage(message)
-  }, [])
+    setSelectedMessage(message);
+  }, []);
 
   // Close JSON view modal
   const handleCloseJsonModal = React.useCallback(() => {
-    setSelectedMessage(null)
-  }, [])
+    setSelectedMessage(null);
+  }, []);
 
   // Handle mode change - no auto popup
   const handleModeChange = (value: string | number) => {
-    const newMode = value as 'normal' | 'replay'
-    setMode(newMode)
-  }
+    const newMode = value as 'normal' | 'replay';
+    setMode(newMode);
+  };
 
   // Handle unified config confirm
   const handleConfigConfirm = () => {
-    setShowConfig(false)
-    const currentMode = useConfigStore.getState().mode
-    message.success(`${currentMode === 'normal' ? 'Normal' : 'Replay'} mode configuration saved`)
-  }
+    setShowConfig(false);
+    const currentMode = useConfigStore.getState().mode;
+    message.success(`${currentMode === 'normal' ? 'Normal' : 'Replay'} mode configuration saved`);
+  };
 
   // Handle config cancel
   const handleConfigCancel = () => {
-    setShowConfig(false)
-  }
+    setShowConfig(false);
+  };
 
   return (
     <ConfigProvider>
       <Layout className="h-screen flex flex-col">
-        <Header 
+        <Header
           className="bg-white border-b border-gray-200 flex items-center px-6 flex-shrink-0 h-16"
           style={{ backgroundColor: '#ffffff', paddingLeft: '24px', paddingRight: '24px' }}
         >
@@ -76,7 +76,7 @@ function App() {
           />
         </Content>
       </Layout>
-      
+
       {/* JSON View Modal */}
       <JsonViewModal
         open={!!selectedMessage}
@@ -91,7 +91,7 @@ function App() {
         onCancel={handleConfigCancel}
       />
     </ConfigProvider>
-  )
+  );
 }
 
-export default App
+export default App;

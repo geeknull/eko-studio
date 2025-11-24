@@ -1,13 +1,13 @@
-"use client"
+'use client';
 
-import React from 'react'
-import { Modal, Form, Select, Input, InputNumber, Checkbox, Space, Typography, Collapse, Row, Col } from 'antd'
+import React from 'react';
+import { Modal, Form, Select, Input, InputNumber, Checkbox, Space, Typography, Collapse, Row, Col } from 'antd';
 
-const { Text } = Typography
+const { Text } = Typography;
 
-export type LLMProvider = "openai" | "anthropic" | "google" | "aws" | "openrouter" | "openai-compatible" | "modelscope"
+export type LLMProvider = 'openai' | 'anthropic' | 'google' | 'aws' | 'openrouter' | 'openai-compatible' | 'modelscope';
 
-export type AgentType = 'BrowserAgent' | 'FileAgent'
+export type AgentType = 'BrowserAgent' | 'FileAgent';
 
 export interface NormalConfig {
   // LLM Configuration
@@ -38,16 +38,16 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const [form] = Form.useForm()
-  const [showAdvanced, setShowAdvanced] = React.useState(false)
+  const [form] = Form.useForm();
+  const [showAdvanced, setShowAdvanced] = React.useState(false);
 
   const handleOk = () => {
     form.validateFields().then((values) => {
       // Handle model field: if array, take first element; if string, use directly
-      const modelValue = Array.isArray(values.model) 
-        ? values.model[0] || values.model 
-        : values.model
-      
+      const modelValue = Array.isArray(values.model)
+        ? values.model[0] || values.model
+        : values.model;
+
       // Build config object
       const config: NormalConfig = {
         llm: {
@@ -63,30 +63,30 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
           },
         },
         agents: values.agents || [],
-      }
-      onConfirm(config)
-      form.resetFields()
-    })
-  }
+      };
+      onConfirm(config);
+      form.resetFields();
+    });
+  };
 
   const handleCancel = () => {
-    form.resetFields()
-    onCancel()
-  }
+    form.resetFields();
+    onCancel();
+  };
 
   // Get common models based on provider
   const getModelOptions = (provider: LLMProvider) => {
     const modelsByProvider: Record<LLMProvider, string[]> = {
-      openai: ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-      anthropic: ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229'],
-      google: ['gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash'],
-      aws: ['anthropic.claude-v2', 'anthropic.claude-instant-v1'],
-      openrouter: ['openai/gpt-5-nano', 'anthropic/claude-sonnet-4.5', 'openai/gpt-5.1'],
+      'openai': ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+      'anthropic': ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229'],
+      'google': ['gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash'],
+      'aws': ['anthropic.claude-v2', 'anthropic.claude-instant-v1'],
+      'openrouter': ['openai/gpt-5-nano', 'anthropic/claude-sonnet-4.5', 'openai/gpt-5.1'],
       'openai-compatible': [],
-      modelscope: [],
-    }
-    return modelsByProvider[provider] || []
-  }
+      'modelscope': [],
+    };
+    return modelsByProvider[provider] || [];
+  };
 
   const providerOptions = [
     { value: 'openai', label: 'OpenAI' },
@@ -96,12 +96,12 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
     { value: 'openrouter', label: 'OpenRouter' },
     { value: 'openai-compatible', label: 'OpenAI Compatible' },
     { value: 'modelscope', label: 'ModelScope' },
-  ]
+  ];
 
   const agentOptions = [
     { value: 'BrowserAgent', label: 'Browser Agent - Browser automation capabilities' },
     { value: 'FileAgent', label: 'File Agent - File system operation capabilities' },
-  ]
+  ];
 
   return (
     <Modal
@@ -142,9 +142,9 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
               <Select
                 options={providerOptions}
                 onChange={(value) => {
-                  const models = getModelOptions(value)
+                  const models = getModelOptions(value);
                   if (models.length > 0) {
-                    form.setFieldValue('model', models[0])
+                    form.setFieldValue('model', models[0]);
                   }
                 }}
               />
@@ -157,7 +157,7 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
               shouldUpdate={(prevValues, currentValues) => prevValues?.provider !== currentValues?.provider}
             >
               {({ getFieldValue }) => {
-                const provider = getFieldValue('provider') as LLMProvider | undefined
+                const provider = getFieldValue('provider') as LLMProvider | undefined;
                 return (
                   <Form.Item
                     name="model"
@@ -173,7 +173,7 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
                       }
                     />
                   </Form.Item>
-                )
+                );
               }}
             </Form.Item>
           </Col>
@@ -198,7 +198,7 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
         {/* Advanced Configuration */}
         <Collapse
           ghost
-          onChange={(keys) => setShowAdvanced(keys.length > 0)}
+          onChange={keys => setShowAdvanced(keys.length > 0)}
           items={[
             {
               key: '1',
@@ -209,14 +209,14 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
                     <Col span={12}>
                       <Form.Item
                         name="temperature"
-                        label={
+                        label={(
                           <Space>
                             <span>Temperature</span>
                             <Text type="secondary" style={{ fontSize: '12px' }}>
                               (0.0 - 2.0)
                             </Text>
                           </Space>
-                        }
+                        )}
                         rules={[
                           { type: 'number', min: 0, max: 2, message: 'Range: 0.0 - 2.0' },
                         ]}
@@ -234,14 +234,14 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
                     <Col span={12}>
                       <Form.Item
                         name="topP"
-                        label={
+                        label={(
                           <Space>
                             <span>Top P</span>
                             <Text type="secondary" style={{ fontSize: '12px' }}>
                               (0.0 - 1.0)
                             </Text>
                           </Space>
-                        }
+                        )}
                         rules={[
                           { type: 'number', min: 0, max: 1, message: 'Range: 0.0 - 1.0' },
                         ]}
@@ -302,16 +302,16 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
             {
               validator: (_, value) => {
                 if (!value || value.length === 0) {
-                  return Promise.reject(new Error('Please select at least one Agent'))
+                  return Promise.reject(new Error('Please select at least one Agent'));
                 }
-                return Promise.resolve()
+                return Promise.resolve();
               },
             },
           ]}
         >
           <Checkbox.Group style={{ width: '100%' }}>
             <Space orientation="vertical" style={{ width: '100%' }}>
-              {agentOptions.map((option) => (
+              {agentOptions.map(option => (
                 <Checkbox key={option.value} value={option.value}>
                   {option.label}
                 </Checkbox>
@@ -324,13 +324,20 @@ export const NormalConfigModal: React.FC<NormalConfigModalProps> = ({
           <Text type="secondary" style={{ fontSize: '12px' }}>
             <strong>Description:</strong>
             <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
-              <li><strong>Browser Agent:</strong> Provides browser automation capabilities, can access web pages, click, fill forms, etc.</li>
-              <li><strong>File Agent:</strong> Provides file system operation capabilities, can read/write files, create directories, etc.</li>
+              <li>
+                <strong>Browser Agent:</strong>
+                {' '}
+                Provides browser automation capabilities, can access web pages, click, fill forms, etc.
+              </li>
+              <li>
+                <strong>File Agent:</strong>
+                {' '}
+                Provides file system operation capabilities, can read/write files, create directories, etc.
+              </li>
             </ul>
           </Text>
         </div>
       </Form>
     </Modal>
-  )
-}
-
+  );
+};

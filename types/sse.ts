@@ -1,4 +1,4 @@
-import { StreamCallbackMessage } from './agent'
+import { StreamCallbackMessage } from './agent';
 
 /**
  * Connection established event
@@ -45,10 +45,9 @@ export interface TextMessageEvent {
 /**
  * SSE event data union type
  */
-export type SseEventData = 
-  | ConnectedEvent 
-  | HeartbeatEvent 
-  | CompleteEvent 
-  | AgentMessageEvent 
-  | TextMessageEvent
-
+export type SseEventData
+  = | ConnectedEvent
+    | HeartbeatEvent
+    | CompleteEvent
+    | AgentMessageEvent
+    | TextMessageEvent;

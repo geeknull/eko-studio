@@ -1,18 +1,18 @@
-import React from 'react'
-import { WorkflowAgentCard } from '../WorkflowAgentCard'
-import type { StreamCallbackMessage, WorkflowAgent } from '../../../types'
+import React from 'react';
+import { WorkflowAgentCard } from '../WorkflowAgentCard';
+import type { StreamCallbackMessage, WorkflowAgent } from '../../../types';
 
 interface AgentStartRendererProps {
-  content: StreamCallbackMessage & { type: 'agent_start'; agentNode: WorkflowAgent }
+  content: StreamCallbackMessage & { type: 'agent_start', agentNode: WorkflowAgent }
 }
 
 /**
  * agent_start message renderer
  */
-export const AgentStartRenderer: React.FC<AgentStartRendererProps> = React.memo(({ 
-  content 
+export const AgentStartRenderer: React.FC<AgentStartRendererProps> = React.memo(({
+  content,
 }) => {
-  const { agentNode, nodeId } = content
+  const { agentNode, nodeId } = content;
 
   return (
     <div>
@@ -24,8 +24,7 @@ export const AgentStartRenderer: React.FC<AgentStartRendererProps> = React.memo(
       )}
       <WorkflowAgentCard agent={agentNode} />
     </div>
-  )
-})
+  );
+});
 
-AgentStartRenderer.displayName = 'AgentStartRenderer'
-
+AgentStartRenderer.displayName = 'AgentStartRenderer';

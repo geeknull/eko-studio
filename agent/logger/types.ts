@@ -7,13 +7,13 @@
  */
 export interface LogEntry {
   /** Message sequence number (starting from 1) */
-  count: number;
+  count: number
   /** Timestamp (milliseconds) */
-  timestamp: number;
+  timestamp: number
   /** Time difference from previous message (milliseconds) */
-  timeDiff: number;
+  timeDiff: number
   /** Original message content */
-  message: unknown;
+  message: unknown
 }
 
 /**
@@ -21,11 +21,11 @@ export interface LogEntry {
  */
 export interface LoggerOptions {
   /** Log directory, defaults to agent-log in project root */
-  logDir?: string;
+  logDir?: string
   /** Model name */
-  modelName: string;
+  modelName: string
   /** Whether to enable logging, defaults to true */
-  enabled?: boolean;
+  enabled?: boolean
 }
 
 /**
@@ -33,18 +33,16 @@ export interface LoggerOptions {
  */
 export interface LogPlayerOptions {
   /** Log file path */
-  logFilePath: string;
+  logFilePath: string
   /** Replay mode: 'realtime' uses original time differences, 'fixed' uses fixed intervals */
-  mode?: 'realtime' | 'fixed';
+  mode?: 'realtime' | 'fixed'
   /** Fixed time interval (milliseconds), only effective when mode='fixed' */
-  fixedInterval?: number;
+  fixedInterval?: number
   /** Playback speed multiplier, defaults to 1.0 (normal speed), 2.0 means 2x speed */
-  speed?: number;
+  speed?: number
 }
 
 /**
  * Log playback callback function
  */
 export type LogPlaybackCallback = (entry: LogEntry, index: number, total: number) => void | Promise<void>;
-
-

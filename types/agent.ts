@@ -11,22 +11,22 @@ export type { StreamCallbackMessage, Workflow, WorkflowAgent, WorkflowNode };
 // We define them locally to match the expected structure.
 
 export type WorkflowTextNode = {
-  type: "normal";
-  text: string;
-  input?: string | null;
-  output?: string | null;
+  type: 'normal'
+  text: string
+  input?: string | null
+  output?: string | null
 };
 
 export type WorkflowForEachNode = {
-  type: "forEach";
-  items: string; // list or variable name
-  nodes: WorkflowNode[];
+  type: 'forEach'
+  items: string // list or variable name
+  nodes: WorkflowNode[]
 };
 
 export type WorkflowWatchNode = {
-  type: "watch";
-  event: "dom" | "gui" | "file";
-  loop: boolean;
-  description: string;
-  triggerNodes: (WorkflowTextNode | WorkflowForEachNode)[];
+  type: 'watch'
+  event: 'dom' | 'gui' | 'file'
+  loop: boolean
+  description: string
+  triggerNodes: (WorkflowTextNode | WorkflowForEachNode)[]
 };

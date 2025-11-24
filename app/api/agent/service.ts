@@ -5,11 +5,11 @@ import type { AgentStartResponse } from './types';
  * Task storage interface
  */
 interface TaskInfo {
-  taskId: string;
-  query: string;
-  params?: Record<string, unknown>;
-  status: 'pending' | 'running' | 'completed' | 'error';
-  createdAt: Date;
+  taskId: string
+  query: string
+  params?: Record<string, unknown>
+  status: 'pending' | 'running' | 'completed' | 'error'
+  createdAt: Date
 }
 
 /**
@@ -23,14 +23,14 @@ const taskStore = new Map<string, TaskInfo>();
  */
 export async function agentStart(
   query: string,
-  params?: Record<string, unknown>
+  params?: Record<string, unknown>,
 ): Promise<AgentStartResponse['data']> {
   // Generate a random UUID for the task
   const taskId = randomUUID();
-  
+
   // Construct SSE URL for this task
   const sseUrl = `/api/agent/stream/${taskId}`;
-  
+
   // Store task information
   taskStore.set(taskId, {
     taskId,
@@ -39,7 +39,7 @@ export async function agentStart(
     status: 'pending',
     createdAt: new Date(),
   });
-  
+
   return {
     taskId,
     query,
@@ -60,7 +60,7 @@ export function getTask(taskId: string): TaskInfo | undefined {
  */
 export function updateTaskStatus(
   taskId: string,
-  status: TaskInfo['status']
+  status: TaskInfo['status'],
 ): void {
   const task = taskStore.get(taskId);
   if (task) {
@@ -94,15 +94,14 @@ export function getAllTaskIds(): string[] {
 /**
  * Validate agent query
  */
-export function validateQuery(query: string): { valid: boolean; error?: string } {
+export function validateQuery(query: string): { valid: boolean, error?: string } {
   if (!query || query.trim().length === 0) {
     return { valid: false, error: 'Query cannot be empty' };
   }
-  
+
   if (query.length > 1000) {
     return { valid: false, error: 'Query is too long (max 1000 characters)' };
   }
-  
+
   return { valid: true };
 }
-

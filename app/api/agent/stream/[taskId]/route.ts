@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 /**
  * SSE endpoint for agent streaming
  * GET /api/agent/stream/[taskId]
- * 
+ *
  * Establishes SSE connection and runs agent with stored task parameters
  */
 
@@ -34,7 +34,7 @@ function formatSSEMessage(eventType: SSEEventType, data: unknown): string {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ taskId: string }> | { taskId: string } }
+  { params }: { params: Promise<{ taskId: string }> | { taskId: string } },
 ) {
   // In Next.js 15+, params might be a Promise, so we need to await it
   const resolvedParams = await Promise.resolve(params);
@@ -56,7 +56,7 @@ export async function GET(
   const task = getTask(taskId);
   console.log('SSE Request - task found:', !!task);
   console.log('SSE Request - taskStore size:', getTaskStoreSize());
-  
+
   if (!task) {
     console.error('Task not found:', {
       taskId,
@@ -64,10 +64,10 @@ export async function GET(
       taskStoreSize: getTaskStoreSize(),
     });
     return new Response(
-      formatSSEMessage('error', { 
+      formatSSEMessage('error', {
         error: 'Task not found',
         taskId,
-        message: 'The task may have expired or was not created properly'
+        message: 'The task may have expired or was not created properly',
       }),
       {
         status: 404,
@@ -76,7 +76,7 @@ export async function GET(
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive',
         },
-      }
+      },
     );
   }
 
@@ -96,7 +96,7 @@ export async function GET(
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive',
         },
-      }
+      },
     );
   }
 
@@ -116,7 +116,7 @@ export async function GET(
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive',
         },
-      }
+      },
     );
   }
 
@@ -136,7 +136,7 @@ export async function GET(
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive',
         },
-      }
+      },
     );
   }
 
@@ -156,10 +156,10 @@ export async function GET(
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive',
           },
-        }
+        },
       );
     }
-    
+
     if (fixedInterval < 10 || fixedInterval > 60000) {
       return new Response(
         formatSSEMessage('error', {
@@ -173,7 +173,7 @@ export async function GET(
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive',
           },
-        }
+        },
       );
     }
   }
@@ -188,11 +188,11 @@ export async function GET(
 
       // Send initial connection message
       controller.enqueue(
-        encoder.encode(formatSSEMessage('connected', { 
-          taskId, 
+        encoder.encode(formatSSEMessage('connected', {
+          taskId,
           status: 'connected',
           mode,
-        }))
+        })),
       );
 
       try {
@@ -208,7 +208,8 @@ export async function GET(
             speed,
             fixedInterval,
           });
-        } else {
+        }
+        else {
           // ========================================
           // Run mode: Call run handler
           // ========================================
@@ -220,7 +221,8 @@ export async function GET(
             },
           });
         }
-      } catch (error) {
+      }
+      catch (error) {
         console.error(`[SSE] ${mode} error:`, error);
 
         // Send error message
@@ -231,13 +233,14 @@ export async function GET(
               status: 'error',
               error: error instanceof Error ? error.message : 'Unknown error',
               mode,
-            })
-          )
+            }),
+          ),
         );
 
         // Update task status
         updateTaskStatus(taskId, 'error');
-      } finally {
+      }
+      finally {
         // Close the stream
         console.log(`[SSE] Stream closed for taskId: ${taskId}, mode: ${mode}`);
         controller.close();
@@ -258,4 +261,3 @@ export async function GET(
     },
   });
 }
-

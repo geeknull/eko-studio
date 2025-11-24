@@ -10,38 +10,38 @@ import type { LogPlayerOptions } from './types';
  * SSE Replay Adapter Options
  */
 export interface SSEAdapterOptions extends LogPlayerOptions {
-  /** 
+  /**
    * SSE message callback, called for each log message
    * @param message - Original message content (from log)
    * @param metadata - Metadata (sequence number, timestamp, etc.)
    */
   onMessage: (message: unknown, metadata: {
-    count: number;
-    timestamp: number;
-    timeDiff: number;
-    index: number;
-    total: number;
-  }) => void | Promise<void>;
+    count: number
+    timestamp: number
+    timeDiff: number
+    index: number
+    total: number
+  }) => void | Promise<void>
 
   /**
    * Completion callback (optional)
    */
-  onComplete?: () => void | Promise<void>;
+  onComplete?: () => void | Promise<void>
 
   /**
    * Error callback (optional)
    */
-  onError?: (error: Error) => void | Promise<void>;
+  onError?: (error: Error) => void | Promise<void>
 
   /**
    * Start callback (optional)
    */
   onStart?: (summary: {
-    totalMessages: number;
-    duration: number;
-    firstTimestamp: number;
-    lastTimestamp: number;
-  }) => void | Promise<void>;
+    totalMessages: number
+    duration: number
+    firstTimestamp: number
+    lastTimestamp: number
+  }) => void | Promise<void>
 }
 
 /**
@@ -69,7 +69,7 @@ export class LogPlayerSSEAdapter {
     try {
       // Get log summary
       const summary = this.player.getLogSummary();
-      
+
       if (!summary) {
         throw new Error('Unable to get log summary, log file may be empty');
       }
@@ -99,13 +99,15 @@ export class LogPlayerSSEAdapter {
       if (this.options.onComplete) {
         await this.options.onComplete();
       }
-    } catch (error) {
+    }
+    catch (error) {
       // Call error callback
       if (this.options.onError) {
         await this.options.onError(
-          error instanceof Error ? error : new Error(String(error))
+          error instanceof Error ? error : new Error(String(error)),
         );
-      } else {
+      }
+      else {
         throw error;
       }
     }
@@ -133,4 +135,3 @@ export class LogPlayerSSEAdapter {
     return logs.length > 0 ? logs[0] : null;
   }
 }
-

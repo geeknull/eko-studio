@@ -1,10 +1,10 @@
-import React from 'react'
-import { Typography, Alert, Collapse } from 'antd'
-import { InfoCircleOutlined } from '@ant-design/icons'
-import { LazySyntaxHighlighter } from '../../base/LazySyntaxHighlighter'
-import type { StreamCallbackMessage } from '../../../types'
+import React from 'react';
+import { Typography, Alert, Collapse } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { LazySyntaxHighlighter } from '../../base/LazySyntaxHighlighter';
+import type { StreamCallbackMessage } from '../../../types';
 
-const { Text, Paragraph } = Typography
+const { Text, Paragraph } = Typography;
 
 interface DefaultRendererProps {
   content: StreamCallbackMessage
@@ -13,34 +13,36 @@ interface DefaultRendererProps {
 /**
  * Default message renderer - fallback for unknown message types
  */
-export const DefaultRenderer: React.FC<DefaultRendererProps> = React.memo(({ 
-  content 
+export const DefaultRenderer: React.FC<DefaultRendererProps> = React.memo(({
+  content,
 }) => {
-  const [jsonExpanded, setJsonExpanded] = React.useState<string[]>([])
-  
+  const [jsonExpanded, setJsonExpanded] = React.useState<string[]>([]);
+
   // Extract text content from message (if any)
-  const hasTextContent = 'text' in content && content.text
-  const textContent = hasTextContent ? (content as any).text : null
+  const hasTextContent = 'text' in content && content.text;
+  const textContent = hasTextContent ? (content as any).text : null;
 
   // Filter out basic fields, show only special content
-  const contentWithoutBasicFields = { ...content }
-  delete (contentWithoutBasicFields as any).taskId
-  delete (contentWithoutBasicFields as any).agentName
-  delete (contentWithoutBasicFields as any).type
-  delete (contentWithoutBasicFields as any).nodeId
+  const contentWithoutBasicFields = { ...content };
+  delete (contentWithoutBasicFields as any).taskId;
+  delete (contentWithoutBasicFields as any).agentName;
+  delete (contentWithoutBasicFields as any).type;
+  delete (contentWithoutBasicFields as any).nodeId;
 
-  const hasAdditionalContent = Object.keys(contentWithoutBasicFields).length > 0
+  const hasAdditionalContent = Object.keys(contentWithoutBasicFields).length > 0;
 
   return (
     <div>
       {/* Hint message */}
       <Alert
-        title={
+        title={(
           <span>
             <InfoCircleOutlined style={{ marginRight: '8px' }} />
-            Unknown message type: <Text code>{content.type}</Text>
+            Unknown message type:
+            {' '}
+            <Text code>{content.type}</Text>
           </span>
-        }
+        )}
         description="No dedicated renderer for this message type, displaying in default mode"
         type="info"
         showIcon={false}
@@ -51,15 +53,15 @@ export const DefaultRenderer: React.FC<DefaultRendererProps> = React.memo(({
       {textContent && (
         <div style={{ marginBottom: '16px' }}>
           <Text strong>Content:</Text>
-          <Paragraph 
-            style={{ 
+          <Paragraph
+            style={{
               marginTop: '8px',
               padding: '12px',
               backgroundColor: '#fafafa',
               border: '1px solid #e8e8e8',
               borderRadius: '4px',
               whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word'
+              wordBreak: 'break-word',
             }}
           >
             {textContent}
@@ -74,7 +76,7 @@ export const DefaultRenderer: React.FC<DefaultRendererProps> = React.memo(({
             size="small"
             ghost
             activeKey={jsonExpanded}
-            onChange={(keys) => setJsonExpanded(keys as string[])}
+            onChange={keys => setJsonExpanded(keys as string[])}
             items={[
               {
                 key: 'raw-data',
@@ -88,8 +90,8 @@ export const DefaultRenderer: React.FC<DefaultRendererProps> = React.memo(({
                       {JSON.stringify(content, null, 2)}
                     </LazySyntaxHighlighter>
                   </div>
-                )
-              }
+                ),
+              },
             ]}
           />
         </div>
@@ -100,8 +102,7 @@ export const DefaultRenderer: React.FC<DefaultRendererProps> = React.memo(({
         <Text type="secondary">No content available for this message</Text>
       )}
     </div>
-  )
-})
+  );
+});
 
-DefaultRenderer.displayName = 'DefaultRenderer'
-
+DefaultRenderer.displayName = 'DefaultRenderer';

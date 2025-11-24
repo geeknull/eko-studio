@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import React from 'react'
-import { Typography, Segmented, Button } from 'antd'
-import { ThunderboltOutlined, PlayCircleOutlined, SettingOutlined } from '@ant-design/icons'
+import React from 'react';
+import { Typography, Segmented, Button } from 'antd';
+import { ThunderboltOutlined, PlayCircleOutlined, SettingOutlined } from '@ant-design/icons';
 
-const { Text } = Typography
+const { Text } = Typography;
 
 interface HeaderControlsProps {
   mode: 'normal' | 'replay'
@@ -52,6 +52,5 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
         Configuration
       </Button>
     </div>
-  )
-}
-
+  );
+};

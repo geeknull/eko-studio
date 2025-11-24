@@ -1,12 +1,12 @@
-import React from 'react'
-import { Space, Typography, Tag, Divider, Alert } from 'antd'
-import { CheckCircleOutlined, FileTextOutlined, CloseCircleOutlined, WarningOutlined } from '@ant-design/icons'
-import { WorkflowAgentCard } from '../WorkflowAgentCard'
-import { MarkdownRenderer } from '../../base/MarkdownRenderer'
-import { LazySyntaxHighlighter } from '../../base/LazySyntaxHighlighter'
-import type { StreamCallbackMessage } from '../../../types'
+import React from 'react';
+import { Space, Typography, Tag, Divider, Alert } from 'antd';
+import { CheckCircleOutlined, FileTextOutlined, CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
+import { WorkflowAgentCard } from '../WorkflowAgentCard';
+import { MarkdownRenderer } from '../../base/MarkdownRenderer';
+import { LazySyntaxHighlighter } from '../../base/LazySyntaxHighlighter';
+import type { StreamCallbackMessage } from '../../../types';
 
-const { Text, Title, Paragraph } = Typography
+const { Text, Title, Paragraph } = Typography;
 
 interface AgentResultRendererProps {
   content: StreamCallbackMessage & {
@@ -35,27 +35,30 @@ interface AgentResultRendererProps {
  * agent_result message renderer - renders message when Agent execution is complete and returns result
  */
 export const AgentResultRenderer: React.FC<AgentResultRendererProps> = React.memo(({
-  content
+  content,
 }) => {
-  const { agentNode, result, error, nodeId } = content
-  const hasError = error !== undefined && error !== null
+  const { agentNode, result, error, nodeId } = content;
+  const hasError = error !== undefined && error !== null;
 
   return (
     <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
       {/* Agent info card */}
       <div>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
           gap: '8px',
-          marginBottom: '12px'
-        }}>
+          marginBottom: '12px',
+        }}
+        >
           <Title level={5} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {hasError ? (
-              <CloseCircleOutlined style={{ color: '#ff4d4f', fontSize: '18px' }} />
-            ) : (
-              <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '18px' }} />
-            )}
+            {hasError
+              ? (
+                <CloseCircleOutlined style={{ color: '#ff4d4f', fontSize: '18px' }} />
+              )
+              : (
+                <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '18px' }} />
+              )}
             Agent Result
           </Title>
           <Tag color={hasError ? 'error' : 'success'}>
@@ -79,56 +82,62 @@ export const AgentResultRenderer: React.FC<AgentResultRendererProps> = React.mem
       {/* Error message (if exists) */}
       {hasError && (
         <Alert
-          title={
+          title={(
             <Space>
               <WarningOutlined style={{ fontSize: '16px' }} />
               <Text strong>Agent Execution Error</Text>
             </Space>
-          }
-          description={
+          )}
+          description={(
             <Space orientation="vertical" size="small" style={{ width: '100%' }}>
-              {typeof error === 'string' ? (
-                <Paragraph style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                  {error}
-                </Paragraph>
-              ) : error instanceof Error ? (
-                <>
-                  <div>
-                    <Text strong>Message: </Text>
-                    <Paragraph style={{ margin: 0 }}>{error.message}</Paragraph>
-                  </div>
-                  {error.stack && (
+              {typeof error === 'string'
+                ? (
+                  <Paragraph style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+                    {error}
+                  </Paragraph>
+                )
+                : error instanceof Error
+                  ? (
+                    <>
+                      <div>
+                        <Text strong>Message: </Text>
+                        <Paragraph style={{ margin: 0 }}>{error.message}</Paragraph>
+                      </div>
+                      {error.stack && (
+                        <div style={{
+                          borderRadius: '4px',
+                          overflow: 'hidden',
+                          border: '1px solid #ffccc7',
+                          marginTop: '8px',
+                        }}
+                        >
+                          <LazySyntaxHighlighter
+                            language="text"
+                            shouldRender={true}
+                          >
+                            {error.stack}
+                          </LazySyntaxHighlighter>
+                        </div>
+                      )}
+                    </>
+                  )
+                  : (
                     <div style={{
                       borderRadius: '4px',
                       overflow: 'hidden',
                       border: '1px solid #ffccc7',
-                      marginTop: '8px'
-                    }}>
+                    }}
+                    >
                       <LazySyntaxHighlighter
-                        language="text"
+                        language="json"
                         shouldRender={true}
                       >
-                        {error.stack}
+                        {JSON.stringify(error, null, 2)}
                       </LazySyntaxHighlighter>
                     </div>
                   )}
-                </>
-              ) : (
-                <div style={{
-                  borderRadius: '4px',
-                  overflow: 'hidden',
-                  border: '1px solid #ffccc7'
-                }}>
-                  <LazySyntaxHighlighter
-                    language="json"
-                    shouldRender={true}
-                  >
-                    {JSON.stringify(error, null, 2)}
-                  </LazySyntaxHighlighter>
-                </div>
-              )}
             </Space>
-          }
+          )}
           type="error"
           showIcon
         />
@@ -137,12 +146,13 @@ export const AgentResultRenderer: React.FC<AgentResultRendererProps> = React.mem
       {/* Agent execution result */}
       {result && (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
             gap: '8px',
-            marginBottom: '12px'
-          }}>
+            marginBottom: '12px',
+          }}
+          >
             <FileTextOutlined style={{ color: '#1890ff', fontSize: '16px' }} />
             <Text strong style={{ fontSize: '14px' }}>result:</Text>
           </div>
@@ -150,8 +160,9 @@ export const AgentResultRenderer: React.FC<AgentResultRendererProps> = React.mem
             padding: '16px',
             borderRadius: '8px',
             backgroundColor: '#f0f5ff',
-            border: '1px solid #adc6ff'
-          }}>
+            border: '1px solid #adc6ff',
+          }}
+          >
             <MarkdownRenderer content={result} />
           </div>
         </div>
@@ -164,8 +175,7 @@ export const AgentResultRenderer: React.FC<AgentResultRendererProps> = React.mem
         </Text>
       )}
     </Space>
-  )
-})
+  );
+});
 
-AgentResultRenderer.displayName = 'AgentResultRenderer'
-
+AgentResultRenderer.displayName = 'AgentResultRenderer';

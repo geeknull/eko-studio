@@ -22,11 +22,11 @@ function formatSSEMessage(eventType: SSEEventType, data: unknown): string {
  * Replay handler options
  */
 export interface ReplayHandlerOptions {
-  taskId: string;
-  logFile?: string | null;
-  playbackMode?: string;
-  speed?: number;
-  fixedInterval?: number;
+  taskId: string
+  logFile?: string | null
+  playbackMode?: string
+  speed?: number
+  fixedInterval?: number
 }
 
 /**
@@ -36,7 +36,7 @@ export interface ReplayHandlerOptions {
 export async function handleReplay(
   controller: ReadableStreamDefaultController<Uint8Array>,
   encoder: TextEncoder,
-  options: ReplayHandlerOptions
+  options: ReplayHandlerOptions,
 ): Promise<void> {
   const {
     taskId,
@@ -62,7 +62,8 @@ export async function handleReplay(
     // Use specified log file
     logFilePath = path.join(logDir, logFile);
     console.log('[Replay Handler] Using specified log file:', logFilePath);
-  } else {
+  }
+  else {
     // Use latest log file
     logFilePath = LogPlayerSSEAdapter.getLatestLog(logDir);
     console.log('[Replay Handler] Using latest log file:', logFilePath);
@@ -78,10 +79,10 @@ export async function handleReplay(
     mode: playbackMode as 'realtime' | 'fixed',
     speed,
     fixedInterval,
-    
+
     onStart: async (summary) => {
       console.log(`[Replay Handler] Started: ${summary.totalMessages} messages, ${summary.duration}ms`);
-      
+
       // Send replay information
       controller.enqueue(
         encoder.encode(formatSSEMessage('message', {
@@ -98,7 +99,7 @@ export async function handleReplay(
               fixedInterval: playbackMode === 'fixed' ? fixedInterval : undefined,
             },
           },
-        }))
+        })),
       );
     },
 
@@ -117,15 +118,17 @@ export async function handleReplay(
               timeDiff: metadata.timeDiff,
               progress: `${metadata.index + 1}/${metadata.total}`,
             },
-          }))
+          })),
         );
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof TypeError && (
-          error.message.includes('Invalid state') || 
-          error.message.includes('Controller is already closed')
+          error.message.includes('Invalid state')
+          || error.message.includes('Controller is already closed')
         )) {
           console.warn('[Replay Handler] SSE connection closed by client');
-        } else {
+        }
+        else {
           console.error('[Replay Handler] Error sending message:', error);
         }
       }
@@ -152,10 +155,9 @@ export async function handleReplay(
         status: 'completed',
         message: 'Log replay completed',
         mode: 'replay',
-      })
-    )
+      }),
+    ),
   );
 
   console.log('[Replay Handler] Finished successfully');
 }
-

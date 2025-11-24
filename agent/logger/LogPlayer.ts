@@ -56,7 +56,8 @@ export class LogPlayer {
       let message: unknown;
       try {
         message = JSON.parse(messageJson);
-      } catch (err) {
+      }
+      catch (err) {
         console.warn('Unable to parse JSON message:', messageJson, err);
         continue;
       }
@@ -100,7 +101,8 @@ export class LogPlayer {
   private calculateDelay(currentEntry: LogEntry, nextEntry: LogEntry): number {
     if (this.mode === 'fixed') {
       return this.fixedInterval / this.speed;
-    } else {
+    }
+    else {
       // realtime mode: use next message's timeDiff (time difference from current message)
       const originalDelay = nextEntry.timeDiff;
       return originalDelay / this.speed;
@@ -118,11 +120,11 @@ export class LogPlayer {
    * Get log summary information
    */
   public getLogSummary(): {
-    filePath: string;
-    totalMessages: number;
-    firstTimestamp: number;
-    lastTimestamp: number;
-    duration: number;
+    filePath: string
+    totalMessages: number
+    firstTimestamp: number
+    lastTimestamp: number
+    duration: number
   } | null {
     const entries = this.parseLogFile();
     if (entries.length === 0) {
@@ -158,5 +160,3 @@ export class LogPlayer {
       .reverse(); // Newest first
   }
 }
-
-

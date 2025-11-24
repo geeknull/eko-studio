@@ -13,5 +13,3 @@ export type {
   LogPlaybackCallback,
 } from './types';
 export type { SSEAdapterOptions } from './LogPlayerSSEAdapter';
-
-

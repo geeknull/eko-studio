@@ -1,12 +1,12 @@
-"use client"
+'use client';
 
-import React from 'react'
-import { Modal, Tabs, Form, Select, Input, InputNumber, Checkbox, Space, Typography, Collapse, Row, Col } from 'antd'
-import { useConfigStore } from '@/store'
-import { ReplayConfig } from './ReplayConfigModal'
-import { NormalConfig, LLMProvider } from './NormalConfigModal'
+import React from 'react';
+import { Modal, Tabs, Form, Select, Input, InputNumber, Checkbox, Space, Typography, Collapse, Row, Col } from 'antd';
+import { useConfigStore } from '@/store';
+import { ReplayConfig } from './ReplayConfigModal';
+import { NormalConfig, LLMProvider } from './NormalConfigModal';
 
-const { Text } = Typography
+const { Text } = Typography;
 
 interface ConfigModalProps {
   open: boolean
@@ -19,13 +19,13 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const { mode: currentMode, normalConfig, replayConfig, updateConfig } = useConfigStore()
-  const [normalForm] = Form.useForm()
-  const [replayForm] = Form.useForm()
-  const [activeTab, setActiveTab] = React.useState<'normal' | 'replay'>(currentMode)
-  const [showAdvanced, setShowAdvanced] = React.useState(false)
-  const [playbackMode, setPlaybackMode] = React.useState<'realtime' | 'fixed'>(replayConfig.playbackMode)
-  const [formKey, setFormKey] = React.useState(0)
+  const { mode: currentMode, normalConfig, replayConfig, updateConfig } = useConfigStore();
+  const [normalForm] = Form.useForm();
+  const [replayForm] = Form.useForm();
+  const [activeTab, setActiveTab] = React.useState<'normal' | 'replay'>(currentMode);
+  const [showAdvanced, setShowAdvanced] = React.useState(false);
+  const [playbackMode, setPlaybackMode] = React.useState<'realtime' | 'fixed'>(replayConfig.playbackMode);
+  const [formKey, setFormKey] = React.useState(0);
 
   // Calculate initial values
   const normalInitialValues = React.useMemo(() => {
@@ -40,7 +40,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
         topK: normalConfig.llm.config?.topK,
         maxTokens: normalConfig.llm.config?.maxTokens,
         agents: normalConfig.agents,
-      }
+      };
     }
     return {
       provider: 'openrouter',
@@ -51,44 +51,44 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
       topP: 1.0,
       maxTokens: 4096,
       agents: ['BrowserAgent', 'FileAgent'],
-    }
-  }, [normalConfig])
+    };
+  }, [normalConfig]);
 
   const replayInitialValues = React.useMemo(() => ({
     playbackMode: replayConfig.playbackMode,
     speed: replayConfig.speed,
     fixedInterval: replayConfig.fixedInterval,
-  }), [replayConfig])
+  }), [replayConfig]);
 
   // Initialize form values and state
   React.useEffect(() => {
     if (open) {
-      setActiveTab(currentMode)
-      setPlaybackMode(replayConfig.playbackMode)
+      setActiveTab(currentMode);
+      setPlaybackMode(replayConfig.playbackMode);
       // Update key each time modal opens to force Form remount
-      setFormKey(prev => prev + 1)
+      setFormKey(prev => prev + 1);
     }
-  }, [open, currentMode, replayConfig.playbackMode])
+  }, [open, currentMode, replayConfig.playbackMode]);
 
   const handleOk = () => {
     // Validate the corresponding form based on current tab
-    const formToValidate = activeTab === 'normal' ? normalForm : replayForm
-    
+    const formToValidate = activeTab === 'normal' ? normalForm : replayForm;
+
     formToValidate.validateFields().then(() => {
       // Get values from both forms
-      const normalValues = normalForm.getFieldsValue()
-      const replayValues = replayForm.getFieldsValue()
-      
-      let normalConfigResult: NormalConfig | null = null
-      let replayConfigResult: ReplayConfig
+      const normalValues = normalForm.getFieldsValue();
+      const replayValues = replayForm.getFieldsValue();
+
+      let normalConfigResult: NormalConfig | null = null;
+      let replayConfigResult: ReplayConfig;
 
       // Build Normal config
       if (normalValues.provider && normalValues.model && normalValues.apiKey) {
         // Handle model field: if array, take first element; if string, use directly
-        const modelValue = Array.isArray(normalValues.model) 
-          ? normalValues.model[0] || normalValues.model 
-          : normalValues.model
-        
+        const modelValue = Array.isArray(normalValues.model)
+          ? normalValues.model[0] || normalValues.model
+          : normalValues.model;
+
         normalConfigResult = {
           llm: {
             provider: normalValues.provider,
@@ -103,10 +103,11 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
             },
           },
           agents: normalValues.agents || [],
-        }
-      } else if (normalConfig) {
+        };
+      }
+      else if (normalConfig) {
         // Keep existing config
-        normalConfigResult = normalConfig
+        normalConfigResult = normalConfig;
       }
 
       // Build Replay config
@@ -114,32 +115,32 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
         playbackMode: replayValues.playbackMode || replayConfig.playbackMode,
         speed: replayValues.speed || replayConfig.speed,
         fixedInterval: replayValues.fixedInterval || replayConfig.fixedInterval,
-      }
+      };
 
-      updateConfig(activeTab, normalConfigResult, replayConfigResult)
-      onConfirm()
-    })
-  }
+      updateConfig(activeTab, normalConfigResult, replayConfigResult);
+      onConfirm();
+    });
+  };
 
   const handleCancel = () => {
-    normalForm.resetFields()
-    replayForm.resetFields()
-    onCancel()
-  }
+    normalForm.resetFields();
+    replayForm.resetFields();
+    onCancel();
+  };
 
   // Get common models based on provider
   const getModelOptions = (provider: LLMProvider) => {
     const modelsByProvider: Record<LLMProvider, string[]> = {
-      openai: ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-      anthropic: ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229'],
-      google: ['gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash'],
-      aws: ['anthropic.claude-v2', 'anthropic.claude-instant-v1'],
-      openrouter: ['openai/gpt-5-nano', 'anthropic/claude-sonnet-4.5', 'openai/gpt-5.1'],
+      'openai': ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+      'anthropic': ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229'],
+      'google': ['gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash'],
+      'aws': ['anthropic.claude-v2', 'anthropic.claude-instant-v1'],
+      'openrouter': ['openai/gpt-5-nano', 'anthropic/claude-sonnet-4.5', 'openai/gpt-5.1'],
       'openai-compatible': [],
-      modelscope: [],
-    }
-    return modelsByProvider[provider] || []
-  }
+      'modelscope': [],
+    };
+    return modelsByProvider[provider] || [];
+  };
 
   const providerOptions = [
     { value: 'openai', label: 'OpenAI' },
@@ -149,12 +150,12 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     { value: 'openrouter', label: 'OpenRouter' },
     { value: 'openai-compatible', label: 'OpenAI Compatible' },
     { value: 'modelscope', label: 'ModelScope' },
-  ]
+  ];
 
   const agentOptions = [
     { value: 'BrowserAgent', label: 'Browser Agent - Browser automation capabilities' },
     { value: 'FileAgent', label: 'File Agent - File system operation capabilities' },
-  ]
+  ];
 
   return (
     <Modal
@@ -168,7 +169,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     >
       <Tabs
         activeKey={activeTab}
-        onChange={(key) => setActiveTab(key as 'normal' | 'replay')}
+        onChange={key => setActiveTab(key as 'normal' | 'replay')}
         items={[
           {
             key: 'normal',
@@ -196,9 +197,9 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                       <Select
                         options={providerOptions}
                         onChange={(value) => {
-                          const models = getModelOptions(value)
+                          const models = getModelOptions(value);
                           if (models.length > 0) {
-                            normalForm.setFieldValue('model', models[0])
+                            normalForm.setFieldValue('model', models[0]);
                           }
                         }}
                       />
@@ -211,7 +212,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                       shouldUpdate={(prevValues, currentValues) => prevValues?.provider !== currentValues?.provider}
                     >
                       {({ getFieldValue }) => {
-                        const provider = getFieldValue('provider') as LLMProvider | undefined
+                        const provider = getFieldValue('provider') as LLMProvider | undefined;
                         return (
                           <Form.Item
                             name="model"
@@ -227,7 +228,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                               }
                             />
                           </Form.Item>
-                        )
+                        );
                       }}
                     </Form.Item>
                   </Col>
@@ -251,7 +252,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
 
                 <Collapse
                   ghost
-                  onChange={(keys) => setShowAdvanced(keys.length > 0)}
+                  onChange={keys => setShowAdvanced(keys.length > 0)}
                   items={[
                     {
                       key: '1',
@@ -262,14 +263,14 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                             <Col span={12}>
                               <Form.Item
                                 name="temperature"
-                                label={
+                                label={(
                                   <Space>
                                     <span>Temperature</span>
                                     <Text type="secondary" style={{ fontSize: '12px' }}>
                                       (0.0 - 2.0)
                                     </Text>
                                   </Space>
-                                }
+                                )}
                                 rules={[
                                   { type: 'number', min: 0, max: 2, message: 'Range: 0.0 - 2.0' },
                                 ]}
@@ -287,14 +288,14 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                             <Col span={12}>
                               <Form.Item
                                 name="topP"
-                                label={
+                                label={(
                                   <Space>
                                     <span>Top P</span>
                                     <Text type="secondary" style={{ fontSize: '12px' }}>
                                       (0.0 - 1.0)
                                     </Text>
                                   </Space>
-                                }
+                                )}
                                 rules={[
                                   { type: 'number', min: 0, max: 1, message: 'Range: 0.0 - 1.0' },
                                 ]}
@@ -354,16 +355,16 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                     {
                       validator: (_, value) => {
                         if (!value || value.length === 0) {
-                          return Promise.reject(new Error('Please select at least one Agent'))
+                          return Promise.reject(new Error('Please select at least one Agent'));
                         }
-                        return Promise.resolve()
+                        return Promise.resolve();
                       },
                     },
                   ]}
                 >
                   <Checkbox.Group style={{ width: '100%' }}>
                     <Space orientation="vertical" style={{ width: '100%' }}>
-                      {agentOptions.map((option) => (
+                      {agentOptions.map(option => (
                         <Checkbox key={option.value} value={option.value}>
                           {option.label}
                         </Checkbox>
@@ -376,8 +377,16 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                   <Text type="secondary" style={{ fontSize: '12px' }}>
                     <strong>Description:</strong>
                     <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
-                      <li><strong>Browser Agent:</strong> Provides browser automation capabilities, can access web pages, click, fill forms, etc.</li>
-                      <li><strong>File Agent:</strong> Provides file system operation capabilities, can read/write files, create directories, etc.</li>
+                      <li>
+                        <strong>Browser Agent:</strong>
+                        {' '}
+                        Provides browser automation capabilities, can access web pages, click, fill forms, etc.
+                      </li>
+                      <li>
+                        <strong>File Agent:</strong>
+                        {' '}
+                        Provides file system operation capabilities, can read/write files, create directories, etc.
+                      </li>
                     </ul>
                   </Text>
                 </div>
@@ -402,7 +411,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                   rules={[{ required: true, message: 'Please select playback mode' }]}
                 >
                   <Select
-                    onChange={(value) => setPlaybackMode(value)}
+                    onChange={value => setPlaybackMode(value)}
                     options={[
                       { value: 'realtime', label: 'Realtime - Play with original time intervals' },
                       { value: 'fixed', label: 'Fixed - Play with fixed time intervals' },
@@ -413,14 +422,14 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                 {playbackMode === 'realtime' && (
                   <Form.Item
                     name="speed"
-                    label={
+                    label={(
                       <Space>
                         <span>Playback Speed</span>
                         <Text type="secondary" style={{ fontSize: '12px' }}>
                           (0.1 - 100x)
                         </Text>
                       </Space>
-                    }
+                    )}
                     rules={[
                       { required: true, message: 'Please enter playback speed' },
                       { type: 'number', min: 0.1, max: 100, message: 'Speed must be between 0.1 and 100' },
@@ -440,14 +449,14 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                 {playbackMode === 'fixed' && (
                   <Form.Item
                     name="fixedInterval"
-                    label={
+                    label={(
                       <Space>
                         <span>Fixed Interval</span>
                         <Text type="secondary" style={{ fontSize: '12px' }}>
                           (10 - 60000 ms)
                         </Text>
                       </Space>
-                    }
+                    )}
                     rules={[
                       { required: true, message: 'Please enter fixed interval' },
                       { type: 'number', min: 10, max: 60000, message: 'Interval must be between 10 and 60000 ms' },
@@ -467,8 +476,16 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
                   <Text type="secondary" style={{ fontSize: '12px' }}>
                     <strong>Description:</strong>
                     <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
-                      <li><strong>Realtime Mode:</strong> Play with original time intervals recorded in logs, can be accelerated or decelerated via speed parameter</li>
-                      <li><strong>Fixed Mode:</strong> Play each message with fixed time intervals, ignoring original timestamps</li>
+                      <li>
+                        <strong>Realtime Mode:</strong>
+                        {' '}
+                        Play with original time intervals recorded in logs, can be accelerated or decelerated via speed parameter
+                      </li>
+                      <li>
+                        <strong>Fixed Mode:</strong>
+                        {' '}
+                        Play each message with fixed time intervals, ignoring original timestamps
+                      </li>
                     </ul>
                   </Text>
                 </div>
@@ -478,6 +495,5 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
         ]}
       />
     </Modal>
-  )
-}
-
+  );
+};

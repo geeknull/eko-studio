@@ -113,7 +113,8 @@ export class AgentLogger {
       this.writeStream.write(content, (err) => {
         if (err) {
           reject(err);
-        } else {
+        }
+        else {
           resolve();
         }
       });
@@ -129,7 +130,8 @@ export class AgentLogger {
         this.writeStream!.end((err?: Error | null) => {
           if (err) {
             reject(err);
-          } else {
+          }
+          else {
             resolve();
           }
         });
@@ -158,4 +160,3 @@ export class AgentLogger {
     return this.enabled;
   }
 }
-

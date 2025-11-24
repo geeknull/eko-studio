@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 /**
  * Health check API endpoint
  * GET /api/health
- * 
+ *
  * Returns the application health status including:
  * - Status code
  * - Timestamp
@@ -14,10 +14,10 @@ export async function GET() {
   try {
     // Get current timestamp
     const timestamp = new Date().toISOString();
-    
+
     // Check process uptime (in seconds)
     const uptime = process.uptime();
-    
+
     // Check memory usage
     const memoryUsage = process.memoryUsage();
     const memoryInfo = {
@@ -26,7 +26,7 @@ export async function GET() {
       heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)} MB`,
       external: `${Math.round(memoryUsage.external / 1024 / 1024)} MB`,
     };
-    
+
     // Build health check response
     const healthCheck = {
       status: 'ok',
@@ -36,9 +36,10 @@ export async function GET() {
       memory: memoryInfo,
       nodeVersion: process.version,
     };
-    
+
     return NextResponse.json(healthCheck, { status: 200 });
-  } catch (error) {
+  }
+  catch (error) {
     // Return error status if an error occurs
     return NextResponse.json(
       {
@@ -46,8 +47,7 @@ export async function GET() {
         timestamp: new Date().toISOString(),
         message: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 503 }
+      { status: 503 },
     );
   }
 }
-

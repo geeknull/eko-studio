@@ -1,8 +1,8 @@
-import React from 'react'
-import { Button, message } from 'antd'
-import { CopyOutlined, CheckOutlined } from '@ant-design/icons'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import React from 'react';
+import { Button, message } from 'antd';
+import { CopyOutlined, CheckOutlined } from '@ant-design/icons';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface LazySyntaxHighlighterProps {
   language: string
@@ -15,22 +15,23 @@ interface LazySyntaxHighlighterProps {
  */
 export const LazySyntaxHighlighter: React.FC<LazySyntaxHighlighterProps> = React.memo(
   ({ language, children, shouldRender }) => {
-    const [copied, setCopied] = React.useState(false)
+    const [copied, setCopied] = React.useState(false);
 
     if (!shouldRender) {
-      return null
+      return null;
     }
 
     const handleCopy = async () => {
       try {
-        await navigator.clipboard.writeText(children)
-        setCopied(true)
-        message.success('Copied to clipboard')
-        setTimeout(() => setCopied(false), 2000)
-      } catch (err) {
-        message.error('Failed to copy')
+        await navigator.clipboard.writeText(children);
+        setCopied(true);
+        message.success('Copied to clipboard');
+        setTimeout(() => setCopied(false), 2000);
       }
-    }
+      catch (err) {
+        message.error('Failed to copy');
+      }
+    };
 
     return (
       <div style={{ position: 'relative' }}>
@@ -47,10 +48,10 @@ export const LazySyntaxHighlighter: React.FC<LazySyntaxHighlighterProps> = React
             opacity: 0.6,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '1'
+            e.currentTarget.style.opacity = '1';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '0.6'
+            e.currentTarget.style.opacity = '0.6';
           }}
         />
         <SyntaxHighlighter
@@ -70,9 +71,8 @@ export const LazySyntaxHighlighter: React.FC<LazySyntaxHighlighterProps> = React
           {children}
         </SyntaxHighlighter>
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-LazySyntaxHighlighter.displayName = 'LazySyntaxHighlighter'
-
+LazySyntaxHighlighter.displayName = 'LazySyntaxHighlighter';

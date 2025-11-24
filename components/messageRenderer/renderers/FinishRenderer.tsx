@@ -1,9 +1,9 @@
-import React from 'react'
-import { Card, Typography, Space, Descriptions, Tag, Statistic, Row, Col } from 'antd'
-import { CheckCircleOutlined } from '@ant-design/icons'
-import type { StreamCallbackMessage } from '../../../types'
+import React from 'react';
+import { Card, Typography, Space, Descriptions, Tag, Statistic, Row, Col } from 'antd';
+import { CheckCircleOutlined } from '@ant-design/icons';
+import type { StreamCallbackMessage } from '../../../types';
 
-const { Text } = Typography
+const { Text } = Typography;
 
 interface FinishRendererProps {
   content: StreamCallbackMessage & {
@@ -22,23 +22,23 @@ interface FinishRendererProps {
  * Displays finish reason and token usage
  */
 export const FinishRenderer: React.FC<FinishRendererProps> = React.memo(({
-  content
+  content,
 }) => {
-  const { finishReason, usage, nodeId } = content
+  const { finishReason, usage, nodeId } = content;
 
   return (
     <Card
       size="small"
-      title={
+      title={(
         <Space>
           <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '16px' }} />
           <Text strong style={{ color: '#52c41a' }}>Task Finished</Text>
           <Tag color="success">completed</Tag>
         </Space>
-      }
+      )}
       style={{
         backgroundColor: '#f6ffed',
-        borderColor: '#b7eb8f'
+        borderColor: '#b7eb8f',
       }}
     >
       <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
@@ -47,7 +47,7 @@ export const FinishRenderer: React.FC<FinishRendererProps> = React.memo(({
           <Descriptions.Item label={<Text strong>Finish Reason</Text>}>
             <Tag color="blue">{finishReason}</Tag>
           </Descriptions.Item>
-          
+
           {nodeId && (
             <Descriptions.Item label={<Text strong>Node ID</Text>}>
               <Text code style={{ fontSize: '12px' }}>
@@ -103,8 +103,7 @@ export const FinishRenderer: React.FC<FinishRendererProps> = React.memo(({
         )}
       </Space>
     </Card>
-  )
-})
+  );
+});
 
-FinishRenderer.displayName = 'FinishRenderer'
-
+FinishRenderer.displayName = 'FinishRenderer';
