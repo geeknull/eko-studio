@@ -71,11 +71,12 @@ export function getServerEnv(): Environment {
 
 /**
  * Get client-side environment
- * Only uses client-side environment variables:
- * - NEXT_PUBLIC_ENV (must be explicitly set in environment variables)
+ * Uses client-side environment variables:
+ * - NEXT_PUBLIC_ENV (automatically set in next.config.ts based on VERCEL_ENV)
  *
- * Note: Client-side code cannot access server-side env vars for security reasons.
- * You must set NEXT_PUBLIC_ENV in your environment variables if you need it on the client.
+ * Note: NEXT_PUBLIC_ENV is automatically configured in next.config.ts:
+ * - On Vercel: uses VERCEL_ENV (preview/production/development)
+ * - Locally: defaults to 'development'
  *
  * @returns Current client-side environment
  */
