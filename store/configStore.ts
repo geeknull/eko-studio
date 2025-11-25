@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { isDevelopment } from '@/utils/env';
+import { getDefaultReplayConfig } from '@/config/replayConfig';
 import type { NormalConfig, ReplayConfig } from '@/types';
 
 export interface ConfigState {
@@ -15,22 +15,6 @@ export interface ConfigState {
     replayConfig: ReplayConfig,
   ) => void
   resetConfig: () => void
-}
-
-/**
- * Get default replay config based on environment and playback mode
- * Only fixedInterval is environment-dependent, speed remains constant
- */
-function getDefaultReplayConfig(playbackMode: 'fixed' | 'realtime' = 'fixed'): ReplayConfig {
-  const isDev = isDevelopment();
-  // fixedInterval is only used in 'fixed' mode, but we keep a reasonable default
-  // for 'realtime' mode in case user switches to 'fixed' mode later
-  const defaultFixedInterval = isDev ? 1 : 30;
-  return {
-    playbackMode,
-    speed: 1.0,
-    fixedInterval: defaultFixedInterval,
-  };
 }
 
 const defaultReplayConfig: ReplayConfig = getDefaultReplayConfig('fixed');

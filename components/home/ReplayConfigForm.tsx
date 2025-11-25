@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Form, Select, InputNumber, Space, Typography } from 'antd';
-import { isDevelopment } from '@/utils/env';
+import { getFixedIntervalConfig, getSpeedConfig, getDefaultReplayConfig } from '@/config/replayConfig';
 import type { ReplayConfigFormValues } from '@/types';
 
 const { Text } = Typography;
@@ -22,21 +22,14 @@ export const ReplayConfigForm: React.FC<ReplayConfigFormProps> = ({
   playbackMode,
   onPlaybackModeChange,
 }) => {
-  // Only fixedInterval is environment-dependent, speed remains constant
+  // Use centralized config for default values
   const getDefaultValues = (): ReplayConfigFormValues => {
-    const isDev = isDevelopment();
-    if (playbackMode === 'fixed') {
-      return {
-        playbackMode: 'fixed',
-        speed: initialValues?.speed ?? 1.0,
-        fixedInterval: initialValues?.fixedInterval ?? (isDev ? 1 : 30),
-      };
-    }
-    // realtime mode - speed doesn't depend on environment
+    const defaultConfig = getDefaultReplayConfig(playbackMode);
+
     return {
-      playbackMode: 'realtime',
-      speed: initialValues?.speed ?? 1.0,
-      fixedInterval: initialValues?.fixedInterval ?? 100,
+      playbackMode,
+      speed: initialValues?.speed ?? defaultConfig.speed,
+      fixedInterval: initialValues?.fixedInterval ?? defaultConfig.fixedInterval,
     };
   };
 
@@ -63,58 +56,81 @@ export const ReplayConfigForm: React.FC<ReplayConfigFormProps> = ({
         />
       </Form.Item>
 
-      {playbackMode === 'realtime' && (
-        <Form.Item
-          name="speed"
-          label={(
-            <Space>
-              <span>Playback Speed</span>
-              <Text type="secondary" style={{ fontSize: '12px' }}>
-                (0.1 - 100x)
-              </Text>
-            </Space>
-          )}
-          rules={[
-            { required: true, message: 'Please enter playback speed' },
-            { type: 'number', min: 0.1, max: 100, message: 'Speed must be between 0.1 and 100' },
-          ]}
-        >
-          <InputNumber
-            min={0.1}
-            max={100}
-            step={0.1}
-            precision={1}
-            style={{ width: '100%' }}
-            placeholder="Enter playback speed"
-          />
-        </Form.Item>
-      )}
+      {playbackMode === 'realtime' && (() => {
+        const speedConfig = getSpeedConfig();
+        return (
+          <Form.Item
+            name="speed"
+            label={(
+              <Space>
+                <span>Playback Speed</span>
+                <Text type="secondary" style={{ fontSize: '12px' }}>
+                  {`(${speedConfig.min} - ${speedConfig.max}x)`}
+                </Text>
+              </Space>
+            )}
+            rules={[
+              { required: true, message: 'Please enter playback speed' },
+              {
+                type: 'number',
+                min: speedConfig.min,
+                max: speedConfig.max,
+                message: `Speed must be between ${speedConfig.min} and ${speedConfig.max}`,
+              },
+            ]}
+          >
+            <InputNumber
+              min={speedConfig.min}
+              max={speedConfig.max}
+              step={speedConfig.step}
+              precision={speedConfig.precision}
+              style={{ width: '100%' }}
+              placeholder="Enter playback speed"
+            />
+          </Form.Item>
+        );
+      })()}
 
-      {playbackMode === 'fixed' && (
-        <Form.Item
-          name="fixedInterval"
-          label={(
-            <Space>
-              <span>Fixed Interval</span>
-              <Text type="secondary" style={{ fontSize: '12px' }}>
-                (0 - 60000 ms)
-              </Text>
-            </Space>
-          )}
-          rules={[
-            { required: true, message: 'Please enter fixed interval' },
-            { type: 'number', min: 0, max: 60000, message: 'Interval must be between 0 and 60000 ms' },
-          ]}
-        >
-          <InputNumber
-            min={0}
-            max={60000}
-            step={1}
-            style={{ width: '100%' }}
-            placeholder="Enter fixed interval (ms)"
-          />
-        </Form.Item>
-      )}
+      {playbackMode === 'fixed' && (() => {
+        const fixedIntervalConfig = getFixedIntervalConfig();
+        return (
+          <Form.Item
+            name="fixedInterval"
+            label={(
+              <Space>
+                <span>Fixed Interval</span>
+                <Text type="secondary" style={{ fontSize: '12px' }}>
+                  (
+                  {fixedIntervalConfig.min}
+                  {' '}
+                  -
+                  {' '}
+                  {fixedIntervalConfig.max}
+                  {' '}
+                  ms)
+                </Text>
+              </Space>
+            )}
+            rules={[
+              { required: true, message: 'Please enter fixed interval' },
+              {
+                type: 'number',
+                min: fixedIntervalConfig.min,
+                max: fixedIntervalConfig.max,
+                message: `Interval must be between ${fixedIntervalConfig.min} and ${fixedIntervalConfig.max} ms`,
+              },
+            ]}
+          >
+            <InputNumber
+              min={fixedIntervalConfig.min}
+              max={fixedIntervalConfig.max}
+              step={fixedIntervalConfig.step}
+              style={{ width: '100%' }}
+              placeholder="Enter fixed interval (ms)"
+            />
+          </Form.Item>
+        );
+      })()}
 
       <div style={{ marginTop: '16px', padding: '12px', background: '#f5f5f5', borderRadius: '4px' }}>
         <Text type="secondary" style={{ fontSize: '12px' }}>

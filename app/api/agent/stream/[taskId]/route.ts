@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getTask, updateTaskStatus, getTaskStoreSize, getAllTaskIds } from '@/app/api/agent/service';
-import { isDevelopment } from '@/utils/env';
+import { getFixedIntervalConfig, getSpeedConfig, getDefaultReplayConfig } from '@/config/replayConfig';
 import { handleRun } from '../handlers/runHandler';
 import { handleReplay } from '../handlers/replayHandler';
 
@@ -46,10 +46,9 @@ export async function GET(
   const mode = searchParams.get('mode') || 'normal'; // 'normal' or 'replay'
   const logFile = searchParams.get('logFile'); // Specified log file (replay mode)
   const playbackMode = searchParams.get('playbackMode') || 'fixed'; // Playback mode realtime or fixed
-  const speed = parseFloat(searchParams.get('speed') || '1.0'); // Playback speed
-  // Default fixedInterval: 1 in development, 30 in production
-  const defaultFixedInterval = isDevelopment() ? 1 : 30;
-  const fixedInterval = parseInt(searchParams.get('fixedInterval') || String(defaultFixedInterval), 10); // Fixed interval
+  const defaultConfig = getDefaultReplayConfig(playbackMode as 'fixed' | 'realtime');
+  const speed = parseFloat(searchParams.get('speed') || String(defaultConfig.speed)); // Playback speed
+  const fixedInterval = parseInt(searchParams.get('fixedInterval') || String(defaultConfig.fixedInterval), 10); // Fixed interval
 
   console.log('SSE Request - taskId:', taskId);
   console.log('SSE Request - mode:', mode);
@@ -145,12 +144,15 @@ export async function GET(
 
   // Validate parameters
   if (mode === 'replay') {
-    // Validate replay parameters
-    if (speed < 0.1 || speed > 100) {
+    const speedConfig = getSpeedConfig();
+    const fixedIntervalConfig = getFixedIntervalConfig();
+
+    // Validate speed parameter
+    if (speed < speedConfig.min || speed > speedConfig.max) {
       return new Response(
         formatSSEMessage('error', {
           error: 'Invalid speed parameter',
-          message: 'Speed must be between 0.1 and 100',
+          message: `Speed must be between ${speedConfig.min} and ${speedConfig.max}`,
         }),
         {
           status: 400,
@@ -163,14 +165,12 @@ export async function GET(
       );
     }
 
-    // In development environment, allow fixedInterval to be 0, otherwise minimum is 10
-    const minFixedInterval = isDevelopment() ? 0 : 10;
-    const maxFixedInterval = 60000;
-    if (fixedInterval < minFixedInterval || fixedInterval > maxFixedInterval) {
+    // Validate fixedInterval parameter
+    if (fixedInterval < fixedIntervalConfig.min || fixedInterval > fixedIntervalConfig.max) {
       return new Response(
         formatSSEMessage('error', {
           error: 'Invalid fixedInterval parameter',
-          message: `Fixed interval must be between ${minFixedInterval} and ${maxFixedInterval} ms`,
+          message: `Fixed interval must be between ${fixedIntervalConfig.min} and ${fixedIntervalConfig.max} ms`,
         }),
         {
           status: 400,

@@ -4,7 +4,7 @@ import React from 'react';
 import { Modal, Tabs, Form } from 'antd';
 import { useConfigStore } from '@/store';
 import type { NormalConfig, ReplayConfig, NormalConfigFormValues, ReplayConfigFormValues } from '@/types';
-import { isDevelopment } from '@/utils/env';
+import { getDefaultReplayConfig } from '@/config/replayConfig';
 import { NormalConfigForm } from './NormalConfigForm';
 import { ReplayConfigForm } from './ReplayConfigForm';
 
@@ -62,20 +62,11 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
   }, [normalConfig]);
 
   const replayInitialValues = React.useMemo<ReplayConfigFormValues>(() => {
-    // Only fixedInterval is environment-dependent, speed remains constant
-    const isDev = isDevelopment();
-    if (replayConfig.playbackMode === 'fixed') {
-      return {
-        playbackMode: 'fixed',
-        speed: replayConfig.speed,
-        fixedInterval: replayConfig.fixedInterval ?? (isDev ? 1 : 30),
-      };
-    }
-    // realtime mode - speed doesn't depend on environment
+    const defaultConfig = getDefaultReplayConfig(replayConfig.playbackMode);
     return {
-      playbackMode: 'realtime',
-      speed: replayConfig.speed ?? 1.0,
-      fixedInterval: replayConfig.fixedInterval,
+      playbackMode: replayConfig.playbackMode,
+      speed: replayConfig.speed ?? defaultConfig.speed,
+      fixedInterval: replayConfig.fixedInterval ?? defaultConfig.fixedInterval,
     };
   }, [replayConfig]);
 
