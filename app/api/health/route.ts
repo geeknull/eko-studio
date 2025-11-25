@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getEnv } from '@/utils/env';
 
 /**
  * Health check API endpoint
@@ -32,7 +33,7 @@ export async function GET() {
       status: 'ok',
       timestamp,
       uptime: `${Math.floor(uptime / 60)} minutes`,
-      environment: process.env.NODE_ENV || 'development',
+      environment: getEnv(),
       memory: memoryInfo,
       nodeVersion: process.version,
     };

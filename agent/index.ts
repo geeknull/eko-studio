@@ -1,6 +1,7 @@
 import { BrowserAgent, FileAgent } from '@eko-ai/eko-nodejs';
 import { Eko, Agent, Log, LLMs, StreamCallbackMessage } from '@eko-ai/eko';
 import { AgentLogger } from './logger';
+import type { NormalConfig } from '@/types';
 export const runtime = 'nodejs';
 
 const openrouterApiKey = process.env.OPENROUTER_API_KEY;
@@ -21,25 +22,6 @@ const defaultLLMs: LLMs = {
     },
   },
 };
-
-/**
- * Normal mode configuration from frontend
- */
-export interface NormalConfig {
-  llm: {
-    provider: string
-    model: string
-    apiKey: string
-    config?: {
-      baseURL?: string
-      temperature?: number
-      topP?: number
-      topK?: number
-      maxTokens?: number
-    }
-  }
-  agents: string[]
-}
 /**
  * Callback type for handling stream messages
  */

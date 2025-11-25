@@ -1,4 +1,4 @@
-import type { LLMProvider } from './NormalConfigModal';
+import type { LLMProvider } from '@/types';
 
 /**
  * Get common models based on provider

@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getTask, updateTaskStatus, getTaskStoreSize, getAllTaskIds } from '@/app/api/agent/service';
+import { isDevelopment } from '@/utils/env';
 import { handleRun } from '../handlers/runHandler';
 import { handleReplay } from '../handlers/replayHandler';
 
@@ -46,7 +47,9 @@ export async function GET(
   const logFile = searchParams.get('logFile'); // Specified log file (replay mode)
   const playbackMode = searchParams.get('playbackMode') || 'fixed'; // Playback mode realtime or fixed
   const speed = parseFloat(searchParams.get('speed') || '1.0'); // Playback speed
-  const fixedInterval = parseInt(searchParams.get('fixedInterval') || '10', 10); // Fixed interval
+  // Default fixedInterval: 1 in development, 30 in production
+  const defaultFixedInterval = isDevelopment() ? 1 : 30;
+  const fixedInterval = parseInt(searchParams.get('fixedInterval') || String(defaultFixedInterval), 10); // Fixed interval
 
   console.log('SSE Request - taskId:', taskId);
   console.log('SSE Request - mode:', mode);
@@ -160,11 +163,14 @@ export async function GET(
       );
     }
 
-    if (fixedInterval < 10 || fixedInterval > 60000) {
+    // In development environment, allow fixedInterval to be 0, otherwise minimum is 10
+    const minFixedInterval = isDevelopment() ? 0 : 10;
+    const maxFixedInterval = 60000;
+    if (fixedInterval < minFixedInterval || fixedInterval > maxFixedInterval) {
       return new Response(
         formatSSEMessage('error', {
           error: 'Invalid fixedInterval parameter',
-          message: 'Fixed interval must be between 10 and 60000 ms',
+          message: `Fixed interval must be between ${minFixedInterval} and ${maxFixedInterval} ms`,
         }),
         {
           status: 400,
