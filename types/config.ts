@@ -1,24 +1,22 @@
-export type LLMProvider = 'openai' | 'anthropic' | 'google' | 'aws' | 'openrouter' | 'openai-compatible' | 'modelscope';
+import type { LLMConfig, LLMprovider } from '@eko-ai/eko/types';
 
 export type AgentType = 'BrowserAgent' | 'FileAgent';
 
+// NormalConfig uses LLMConfig from @eko-ai/eko, but restricts apiKey and baseURL to string (not function)
 export interface NormalConfig {
-  // LLM Configuration
-  llm: {
-    provider: LLMProvider
-    model: string
-    apiKey: string
-    config?: {
-      baseURL?: string
-      temperature?: number
-      topP?: number
-      topK?: number
-      maxTokens?: number
+  // LLM Configuration - using LLMConfig from @eko-ai/eko
+  llm: Omit<LLMConfig, 'apiKey' | 'config'> & {
+    apiKey: string // Restrict to string only (not function) for our use case
+    config?: Omit<NonNullable<LLMConfig['config']>, 'baseURL'> & {
+      baseURL?: string // Restrict to string only (not function) for our use case
     }
   }
   // Agents Configuration
   agents: AgentType[]
 }
+
+// Re-export LLMprovider for convenience (can also import directly from '@eko-ai/eko/types')
+export type { LLMprovider };
 
 export interface ReplayConfig {
   playbackMode: 'realtime' | 'fixed'
@@ -34,8 +32,8 @@ export interface ReplayConfigFormValues {
 }
 
 export interface NormalConfigFormValues {
-  provider: LLMProvider
-  model: string[]
+  provider: LLMprovider
+  model: string // Changed from string[] to string since we only need one model
   apiKey: string
   baseURL?: string
   temperature?: number

@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Form, Select, Input, InputNumber, Checkbox, Space, Typography, Collapse, Row, Col, Tooltip } from 'antd';
+import { Form, Select, Input, InputNumber, Checkbox, Space, Typography, Collapse, Row, Col, Tooltip, AutoComplete } from 'antd';
 import { getModelOptions, getDefaultBaseURL } from './llmProviderUtils';
 import { isDevelopment } from '@/utils/env';
-import type { LLMProvider, NormalConfigFormValues } from '@/types';
+import type { NormalConfigFormValues } from '@/types';
+import type { LLMprovider } from '@eko-ai/eko/types';
 
 const { Text } = Typography;
 
@@ -73,7 +74,7 @@ export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({
               onChange={(value) => {
                 const models = getModelOptions(value);
                 if (models.length > 0) {
-                  form.setFieldValue('model', [models[0]]);
+                  form.setFieldValue('model', models[0]);
                 }
                 // Update Base URL when provider changes
                 const defaultBaseURL = getDefaultBaseURL(value);
@@ -91,20 +92,20 @@ export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({
             shouldUpdate={(prevValues, currentValues) => prevValues?.provider !== currentValues?.provider}
           >
             {({ getFieldValue }) => {
-              const provider = getFieldValue('provider') as LLMProvider | undefined;
+              const provider = getFieldValue('provider') as LLMprovider | undefined;
               return (
                 <Form.Item
                   name="model"
                   rules={[{ required: true, message: 'Please enter model name' }]}
                   noStyle
                 >
-                  <Select
-                    mode="tags"
-                    maxCount={1}
+                  <AutoComplete
+                    allowClear
                     placeholder="Select or enter model name"
                     options={
                       provider ? getModelOptions(provider).map(m => ({ value: m, label: m })) : []
                     }
+                    // AutoComplete 默认支持输入自定义值和自动过滤选项
                   />
                 </Form.Item>
               );

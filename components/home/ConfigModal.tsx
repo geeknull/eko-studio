@@ -39,7 +39,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     if (normalConfig) {
       return {
         provider: normalConfig.llm.provider,
-        model: Array.isArray(normalConfig.llm.model) ? normalConfig.llm.model : [normalConfig.llm.model],
+        model: normalConfig.llm.model,
         apiKey: normalConfig.llm.apiKey,
         baseURL: normalConfig.llm.config?.baseURL,
         temperature: normalConfig.llm.config?.temperature,
@@ -51,7 +51,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     }
     return {
       provider: 'openrouter',
-      model: ['openai/gpt-5-nano'],
+      model: 'openai/gpt-5-nano',
       apiKey: '',
       baseURL: 'https://openrouter.ai/api/v1',
       temperature: 0.7,
@@ -93,10 +93,8 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
 
       // Build Normal config
       if (normalValues.provider && normalValues.model && normalValues.apiKey) {
-        // Handle model field: if array, take first element; if string, use directly
-        const modelValue = Array.isArray(normalValues.model)
-          ? normalValues.model[0] || normalValues.model
-          : normalValues.model;
+        // Model is now a string, no need to handle array
+        const modelValue = normalValues.model;
 
         normalConfigResult = {
           llm: {
