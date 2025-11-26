@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Form, Select, Input, InputNumber, Checkbox, Space, Typography, Collapse, Row, Col } from 'antd';
+import { Form, Select, Input, InputNumber, Checkbox, Space, Typography, Collapse, Row, Col, Tooltip } from 'antd';
 import { getModelOptions, getDefaultBaseURL } from './llmProviderUtils';
+import { isDevelopment } from '@/utils/env';
 import type { LLMProvider, NormalConfigFormValues } from '@/types';
 
 const { Text } = Typography;
@@ -18,7 +19,19 @@ export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({
   initialValues,
   formKey,
 }) => {
-  const [showAdvanced, setShowAdvanced] = React.useState(false);
+  const isDevEnv = isDevelopment();
+
+  // Filter out BrowserAgent and FileAgent from initial values if not in development environment
+  React.useEffect(() => {
+    if (!isDevEnv && initialValues?.agents) {
+      const filteredAgents = initialValues.agents.filter(
+        agent => agent !== 'FileAgent' && agent !== 'BrowserAgent',
+      );
+      if (filteredAgents.length !== initialValues.agents.length) {
+        form.setFieldValue('agents', filteredAgents);
+      }
+    }
+  }, [isDevEnv, initialValues, form]);
 
   const providerOptions = [
     { value: 'openai', label: 'OpenAI' },
@@ -118,7 +131,6 @@ export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({
 
       <Collapse
         ghost
-        onChange={keys => setShowAdvanced(keys.length > 0)}
         items={[
           {
             key: '1',
@@ -230,11 +242,29 @@ export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({
       >
         <Checkbox.Group style={{ width: '100%' }}>
           <Space orientation="vertical" style={{ width: '100%' }}>
-            {agentOptions.map(option => (
-              <Checkbox key={option.value} value={option.value}>
-                {option.label}
-              </Checkbox>
-            ))}
+            {agentOptions.map((option) => {
+              const isDisabled = !isDevEnv;
+
+              const checkbox = (
+                <Checkbox key={option.value} value={option.value} disabled={isDisabled}>
+                  {option.label}
+                </Checkbox>
+              );
+
+              if (isDisabled) {
+                return (
+                  <Tooltip
+                    key={option.value}
+                    title="Only available in local development environment"
+                    placement="right"
+                  >
+                    {checkbox}
+                  </Tooltip>
+                );
+              }
+
+              return checkbox;
+            })}
           </Space>
         </Checkbox.Group>
       </Form.Item>
@@ -259,4 +289,3 @@ export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({
     </Form>
   );
 };
-
