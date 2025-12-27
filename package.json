@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "init": "pnpm playwright install chromium",
-    "agent:test": "tsx watch --clear-screen=false ./agent/agent-test.ts",
+    "agent:test": "tsx watch --clear-screen=false ./src/agent/agent-test.ts",
     "deploy": "vercel deploy --prod"
   },
   "dependencies": {
