@@ -17,7 +17,12 @@
       "Bash(ls:*)",
       "Bash(npx next dev:*)",
       "Bash(mkdir:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(tree:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm exec tsc:*)",
+      "Bash(pnpm dev:electron:*)",
+      "Bash(node:*)"
     ]
   }
 }

@@ -11,6 +11,22 @@ if (typeof globalThis.require === 'undefined') {
   globalThis.require = createRequire(import.meta.url);
 }
 
+/**
+ * Get Playwright Chromium executable path for Electron environment
+ * In production Electron, Chromium is bundled in resources/playwright-browsers
+ */
+function getPlaywrightExecutablePath(): string | undefined {
+  // Check if running in Electron production environment
+  const chromiumPath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  if (chromiumPath) {
+    console.log('[Agent] Using custom Chromium path:', chromiumPath);
+    return chromiumPath;
+  }
+
+  // Development or non-Electron: let Playwright find browser automatically
+  return undefined;
+}
+
 const openrouterApiKey = process.env.OPENROUTER_API_KEY;
 const openrouterBaseURL = process.env.OPENROUTER_BASE_URL;
 console.log('openrouterApiKey', openrouterApiKey);
@@ -79,13 +95,17 @@ export async function run(options?: {
   // Dynamically import BrowserAgent (executed after polyfill)
   const { BrowserAgent } = await import('@eko-ai/eko-nodejs');
 
+  // Get Chromium executable path for Electron environment
+  const executablePath = getPlaywrightExecutablePath();
+  const browserOptions = executablePath ? { executablePath } : undefined;
+
   // Build agents configuration
   // Note: Use type assertion due to version mismatch between @eko-ai/eko and @eko-ai/eko-nodejs
-  let agents: Agent[] = [new BrowserAgent() as unknown as Agent];
+  let agents: Agent[] = [new BrowserAgent(browserOptions) as unknown as Agent];
   if (normalConfig?.agents && normalConfig.agents.length > 0) {
     agents = [];
     if (normalConfig.agents.includes('BrowserAgent')) {
-      agents.push(new BrowserAgent() as unknown as Agent);
+      agents.push(new BrowserAgent(browserOptions) as unknown as Agent);
     }
     console.log('Using normalConfig agents:', normalConfig.agents);
   }

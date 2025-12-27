@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  output: 'standalone', // Enable standalone output for Electron
   serverExternalPackages: ['canvas', 'playwright', 'playwright-core', 'playwright-extra', 'puppeteer-extra-plugin-stealth', 'chromium-bidi', '@eko-ai/eko-nodejs'],
   /* config options here */
   typescript: {

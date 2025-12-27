@@ -2,14 +2,23 @@
   "name": "eko-studio",
   "version": "0.1.0",
   "private": true,
+  "main": "dist-electron/main/index.js",
   "scripts": {
     "dev": "next dev",
+    "dev:electron": "concurrently -n next,electron \"next dev\" \"wait-on http://localhost:3000 && electron .\"",
     "build": "next build",
+    "build:electron": "pnpm build && tsc -p tsconfig.electron.json",
+    "build:electron:mac": "pnpm build:electron && node scripts/copy-playwright-browsers.js darwin && electron-builder --mac",
+    "build:electron:win": "pnpm build:electron && node scripts/copy-playwright-browsers.js win32 && electron-builder --win",
+    "build:electron:linux": "pnpm build:electron && node scripts/copy-playwright-browsers.js linux && electron-builder --linux",
+    "build:electron:all": "pnpm build:electron && node scripts/copy-playwright-browsers.js && electron-builder --mac --win --linux",
     "start": "next start",
     "lint": "eslint",
     "init": "pnpm playwright install chromium",
     "agent:test": "tsx watch --clear-screen=false ./src/agent/agent-test.ts",
-    "deploy": "vercel deploy --prod"
+    "deploy": "vercel deploy --prod",
+    "postinstall:electron": "electron-builder install-app-deps",
+    "postinstall:web": "pnpm install --force"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
@@ -39,11 +48,25 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "concurrently": "^9.2.1",
     "dotenv": "^17.2.3",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
+    "electron-updater": "^6.6.2",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^9.0.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "canvas",
+      "electron-winstaller",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }

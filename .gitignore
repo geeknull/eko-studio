@@ -42,3 +42,8 @@ next-env.d.ts
 
 # agent logs
 /agent-log
+
+# electron
+/dist-electron
+/release
+/playwright-browsers
