@@ -33,6 +33,7 @@ async function processAgentStart(
     }
   }
 
+  console.log('isNodeRuntime-agentStart', process?.release?.name === 'node');
   // Start agent task and get task ID (use empty string if query is not provided)
   const result = await agentStart(query || '', params);
 

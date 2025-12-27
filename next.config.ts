@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['@eko-ai/eko', '@eko-ai/eko-nodejs', 'canvas'],
+  serverExternalPackages: ['canvas', 'playwright', 'playwright-core', 'playwright-extra', 'puppeteer-extra-plugin-stealth', 'chromium-bidi', '@eko-ai/eko-nodejs'],
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,

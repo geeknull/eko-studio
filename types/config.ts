@@ -1,6 +1,7 @@
 import type { LLMConfig, LLMprovider } from '@eko-ai/eko/types';
 
-export type AgentType = 'BrowserAgent' | 'FileAgent';
+// Note: FileAgent was removed in eko 4.x
+export type AgentType = 'BrowserAgent';
 
 // NormalConfig uses LLMConfig from @eko-ai/eko, but restricts apiKey and baseURL to string (not function)
 export interface NormalConfig {

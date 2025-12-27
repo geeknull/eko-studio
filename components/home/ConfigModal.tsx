@@ -25,14 +25,6 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
   const [activeTab, setActiveTab] = React.useState<'normal' | 'replay'>(currentMode);
   const [playbackMode, setPlaybackMode] = React.useState<'realtime' | 'fixed'>(replayConfig.playbackMode);
   const [formKey, setFormKey] = React.useState(0);
-  const [isMounted, setIsMounted] = React.useState(false);
-
-  // Only render forms after modal has been opened at least once
-  React.useEffect(() => {
-    if (open) {
-      setIsMounted(true);
-    }
-  }, [open]);
 
   // Calculate initial values
   const normalInitialValues = React.useMemo<NormalConfigFormValues>(() => {
@@ -57,7 +49,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
       temperature: 0.7,
       topP: 1.0,
       maxTokens: 4096,
-      agents: ['BrowserAgent', 'FileAgent'],
+      agents: ['BrowserAgent'],
     };
   }, [normalConfig]);
 
@@ -145,39 +137,37 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
       okText="Confirm"
       cancelText="Cancel"
     >
-      {isMounted && (
-        <Tabs
-          activeKey={activeTab}
-          onChange={key => setActiveTab(key as 'normal' | 'replay')}
-          destroyOnHidden={false}
-          items={[
-            {
-              key: 'normal',
-              label: 'Normal Mode',
-              children: (
-                <NormalConfigForm
-                  form={normalForm}
-                  initialValues={normalInitialValues}
-                  formKey={formKey}
-                />
-              ),
-            },
-            {
-              key: 'replay',
-              label: 'Replay Mode',
-              children: (
-                <ReplayConfigForm
-                  form={replayForm}
-                  initialValues={replayInitialValues}
-                  formKey={formKey}
-                  playbackMode={playbackMode}
-                  onPlaybackModeChange={setPlaybackMode}
-                />
-              ),
-            },
-          ]}
-        />
-      )}
+      <Tabs
+        activeKey={activeTab}
+        onChange={key => setActiveTab(key as 'normal' | 'replay')}
+        destroyOnHidden={false}
+        items={[
+          {
+            key: 'normal',
+            label: 'Normal Mode',
+            children: (
+              <NormalConfigForm
+                form={normalForm}
+                initialValues={normalInitialValues}
+                formKey={formKey}
+              />
+            ),
+          },
+          {
+            key: 'replay',
+            label: 'Replay Mode',
+            children: (
+              <ReplayConfigForm
+                form={replayForm}
+                initialValues={replayInitialValues}
+                formKey={formKey}
+                playbackMode={playbackMode}
+                onPlaybackModeChange={setPlaybackMode}
+              />
+            ),
+          },
+        ]}
+      />
     </Modal>
   );
 };

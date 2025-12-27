@@ -44,9 +44,9 @@ export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({
     { value: 'modelscope', label: 'ModelScope' },
   ];
 
+  // Note: FileAgent was removed in eko 4.x
   const agentOptions = [
     { value: 'BrowserAgent', label: 'Browser Agent - Browser automation capabilities' },
-    { value: 'FileAgent', label: 'File Agent - File system operation capabilities' },
   ];
 
   return (
@@ -278,11 +278,6 @@ export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({
               <strong>Browser Agent:</strong>
               {' '}
               Provides browser automation capabilities, can access web pages, click, fill forms, etc.
-            </li>
-            <li>
-              <strong>File Agent:</strong>
-              {' '}
-              Provides file system operation capabilities, can read/write files, create directories, etc.
             </li>
           </ul>
         </Text>

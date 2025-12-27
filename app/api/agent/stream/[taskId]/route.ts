@@ -219,6 +219,7 @@ export async function GET(
           // ========================================
           // Run mode: Call run handler
           // ========================================
+          console.log('isNodeRuntime', process?.release?.name === 'node');
           await handleRun(controller, encoder, {
             taskId,
             task: {

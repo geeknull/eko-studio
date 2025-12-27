@@ -1,8 +1,15 @@
-import { BrowserAgent, FileAgent } from '@eko-ai/eko-nodejs';
+import { createRequire } from 'module';
 import { Eko, Agent, Log, LLMs, StreamCallbackMessage } from '@eko-ai/eko';
 import { AgentLogger } from './logger';
 import type { NormalConfig } from '@/types';
+
 export const runtime = 'nodejs';
+
+// Polyfill: Inject global require in ESM environment
+// Fix: @eko-ai/eko-nodejs -> puppeteer-extra-plugin -> require('merge-deep') issue
+if (typeof globalThis.require === 'undefined') {
+  globalThis.require = createRequire(import.meta.url);
+}
 
 const openrouterApiKey = process.env.OPENROUTER_API_KEY;
 const openrouterBaseURL = process.env.OPENROUTER_BASE_URL;
@@ -14,14 +21,13 @@ const defaultLLMs: LLMs = {
   default: {
     provider: 'openrouter',
     model: 'openai/gpt-5-nano',
-    // model: "anthropic/claude-sonnet-4.5",
-    // model: "openai/gpt-5.1",
     apiKey: openrouterApiKey || '',
     config: {
       baseURL: openrouterBaseURL,
     },
   },
 };
+
 /**
  * Callback type for handling stream messages
  */
@@ -34,24 +40,26 @@ const _callback: Callback = {
     console.log('eko-message: ', JSON.stringify(message, null, 2));
   },
 };
-const _query = 'Search for the latest news about Musk, summarize and save to the desktop as Musk.md';
+const _query = 'Summarize the single most important news story of today.';
 
+/**
+ * Raw mode: Run agent directly in the current process
+ */
 export async function run(options?: {
   query?: string
   callback?: Callback
-  enableLog?: boolean // Whether to enable logging, default is true
-  normalConfig?: NormalConfig // Normal mode configuration
-  [key: string]: unknown // Allow additional external parameters
+  enableLog?: boolean
+  normalConfig?: NormalConfig
+  [key: string]: unknown
 }) {
   const {
     callback = _callback,
     query = _query,
     enableLog = true,
     normalConfig,
-    ...externalParams
   } = options || {};
 
-  // Build LLMs configuration: use normalConfig if provided, otherwise use default
+  // Build LLMs configuration
   let llms: LLMs = defaultLLMs;
   if (normalConfig?.llm) {
     llms = {
@@ -68,25 +76,21 @@ export async function run(options?: {
     console.log('Using default LLMs:', llms);
   }
 
+  // Dynamically import BrowserAgent (executed after polyfill)
+  const { BrowserAgent } = await import('@eko-ai/eko-nodejs');
+
   // Build agents configuration
-  let agents: Agent[] = [new BrowserAgent(), new FileAgent()]; // Default agents
+  // Note: Use type assertion due to version mismatch between @eko-ai/eko and @eko-ai/eko-nodejs
+  let agents: Agent[] = [new BrowserAgent() as unknown as Agent];
   if (normalConfig?.agents && normalConfig.agents.length > 0) {
     agents = [];
     if (normalConfig.agents.includes('BrowserAgent')) {
-      agents.push(new BrowserAgent());
-    }
-    if (normalConfig.agents.includes('FileAgent')) {
-      agents.push(new FileAgent());
+      agents.push(new BrowserAgent() as unknown as Agent);
     }
     console.log('Using normalConfig agents:', normalConfig.agents);
   }
   else {
-    console.log('Using default agents: BrowserAgent, FileAgent');
-  }
-
-  // Log external parameters if provided
-  if (Object.keys(externalParams).length > 0) {
-    console.log('External parameters:', externalParams);
+    console.log('Using default agents: BrowserAgent');
   }
 
   // Initialize logger
@@ -95,7 +99,7 @@ export async function run(options?: {
     enabled: enableLog,
   });
 
-  // Wrap callback to add logging functionality
+  // Wrap callback
   const wrappedCallback: Callback = {
     onMessage: async (message: StreamCallbackMessage) => {
       // Log first
@@ -113,7 +117,6 @@ export async function run(options?: {
 
     console.log('result: ', result.result);
 
-    // Output log file path
     if (logger.isEnabled()) {
       console.log(`Log saved to: ${logger.getLogFilePath()}`);
       console.log(`Total messages: ${logger.getMessageCount()}`);
@@ -122,7 +125,6 @@ export async function run(options?: {
     return result;
   }
   finally {
-    // Ensure logger is properly closed
     await logger.close();
   }
 }

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm update:*)",
+      "Bash(pnpm view:*)",
+      "WebSearch",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm add:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(cat:*)",
+      "Bash(pnpm init:*)",
+      "Bash(pnpm run init:*)",
+      "Bash(pnpm list:*)",
+      "Bash(pnpm playwright install:*)",
+      "Bash(pnpm install:*)",
+      "Bash(ls:*)",
+      "Bash(npx next dev:*)"
+    ]
+  }
+}
