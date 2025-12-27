@@ -22,7 +22,9 @@
       "Bash(pnpm approve-builds:*)",
       "Bash(pnpm exec tsc:*)",
       "Bash(pnpm dev:electron:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(hdiutil detach:*)",
+      "Bash(\"/Users/geeknull/code-github/eko-studio/release/mac-arm64/Eko Studio.app/Contents/MacOS/Eko Studio\")"
     ]
   }
 }

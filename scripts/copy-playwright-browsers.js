@@ -129,18 +129,26 @@ async function main() {
     process.exit(1);
   }
 
-  // Clean destination
+  const destChromiumDir = path.join(DEST_DIR, chromiumDir);
+  const destPath = path.join(destChromiumDir, chromiumSubdir);
+
+  // Check if same version already exists (skip copy)
+  if (fs.existsSync(destPath)) {
+    console.log(`[Copy Browsers] Same version already exists: ${chromiumDir}`);
+    console.log('[Copy Browsers] Skipping copy.');
+    return;
+  }
+
+  // Clean old versions
   if (fs.existsSync(DEST_DIR)) {
-    console.log('[Copy Browsers] Cleaning existing browsers directory...');
+    console.log('[Copy Browsers] Removing old version...');
     fs.rmSync(DEST_DIR, { recursive: true });
   }
 
   // Create destination structure
-  const destChromiumDir = path.join(DEST_DIR, chromiumDir);
   fs.mkdirSync(destChromiumDir, { recursive: true });
 
   // Copy chromium
-  const destPath = path.join(destChromiumDir, chromiumSubdir);
   console.log(`[Copy Browsers] Copying from: ${srcPath}`);
   console.log(`[Copy Browsers] Copying to: ${destPath}`);
 

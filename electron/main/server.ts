@@ -1,8 +1,38 @@
 import { app } from 'electron';
 import * as path from 'path';
+import * as fs from 'fs';
 import * as http from 'http';
 import * as net from 'net';
 import { ChildProcess, fork } from 'child_process';
+
+// Log file path
+const logDir = app.isPackaged ? app.getPath('logs') : path.join(__dirname, '../../logs');
+const logFile = path.join(logDir, 'nextjs-server.log');
+
+function ensureLogDir(): void {
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+}
+
+function writeLog(level: string, message: string): void {
+  ensureLogDir();
+  const timestamp = new Date().toISOString();
+  const logLine = `[${timestamp}] [${level}] ${message}\n`;
+  fs.appendFileSync(logFile, logLine);
+  console.log(`[Next.js ${level}] ${message}`);
+}
+
+export function getLogPath(): string {
+  return logFile;
+}
+
+// Callback for runtime errors
+let onRuntimeError: ((error: string) => void) | null = null;
+
+export function setRuntimeErrorHandler(handler: (error: string) => void): void {
+  onRuntimeError = handler;
+}
 
 let serverProcess: ChildProcess | null = null;
 let serverPort: number = 0;
@@ -78,8 +108,8 @@ export async function startNextServer(): Promise<string> {
   serverPort = await findAvailablePort(3000);
   const serverPath = getStandaloneServerPath();
 
-  console.log(`[Server] Starting Next.js server on port ${serverPort}`);
-  console.log(`[Server] Server path: ${serverPath}`);
+  writeLog('INFO', `Starting Next.js server on port ${serverPort}`);
+  writeLog('INFO', `Server path: ${serverPath}`);
 
   // Set environment variables for the server
   const env: NodeJS.ProcessEnv = {
@@ -99,6 +129,9 @@ export async function startNextServer(): Promise<string> {
   }
 
   return new Promise((resolve, reject) => {
+    let stderrOutput = '';
+    let resolved = false;
+
     try {
       serverProcess = fork(serverPath, [], {
         env,
@@ -109,36 +142,56 @@ export async function startNextServer(): Promise<string> {
       });
 
       serverProcess.stdout?.on('data', (data) => {
-        console.log(`[Next.js] ${data.toString().trim()}`);
+        writeLog('INFO', data.toString().trim());
       });
 
       serverProcess.stderr?.on('data', (data) => {
-        console.error(`[Next.js Error] ${data.toString().trim()}`);
+        const output = data.toString().trim();
+        writeLog('ERROR', output);
+        stderrOutput += output + '\n';
+        // Send runtime errors to handler (after server is running)
+        if (resolved && onRuntimeError) {
+          onRuntimeError(output);
+        }
       });
 
       serverProcess.on('error', (error) => {
-        console.error('[Server] Failed to start server:', error);
+        writeLog('ERROR', `Failed to start server: ${error.message}`);
         serverProcess = null;
-        reject(error);
+        if (!resolved) {
+          resolved = true;
+          reject(error);
+        }
       });
 
       serverProcess.on('exit', (code) => {
-        console.log(`[Server] Server exited with code ${code}`);
+        writeLog('INFO', `Server exited with code ${code}`);
         serverProcess = null;
+        // If process exits before we resolve, it's an error
+        if (!resolved && code !== 0) {
+          resolved = true;
+          reject(new Error(`Server process exited with code ${code}\n${stderrOutput}`));
+        }
       });
 
       // Wait for server to be ready
       const serverUrl = `http://localhost:${serverPort}`;
       waitForServer(serverUrl).then((ready) => {
-        if (ready) {
-          console.log('[Server] Next.js server is ready');
-          resolve(serverUrl);
-        } else {
-          reject(new Error('Server failed to start'));
+        if (!resolved) {
+          resolved = true;
+          if (ready) {
+            writeLog('INFO', 'Next.js server is ready');
+            resolve(serverUrl);
+          } else {
+            reject(new Error(`Server failed to start after waiting\n${stderrOutput}`));
+          }
         }
       });
     } catch (error) {
-      reject(error);
+      if (!resolved) {
+        resolved = true;
+        reject(error);
+      }
     }
   });
 }
@@ -148,7 +201,7 @@ export async function startNextServer(): Promise<string> {
  */
 export async function stopNextServer(): Promise<void> {
   if (serverProcess) {
-    console.log('[Server] Stopping Next.js server...');
+    writeLog('INFO', 'Stopping Next.js server...');
     serverProcess.kill('SIGTERM');
 
     // Wait for process to exit
@@ -167,7 +220,7 @@ export async function stopNextServer(): Promise<void> {
     });
 
     serverProcess = null;
-    console.log('[Server] Next.js server stopped');
+    writeLog('INFO', 'Next.js server stopped');
   }
 }
 

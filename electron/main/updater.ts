@@ -1,12 +1,30 @@
-import { autoUpdater, UpdateCheckResult } from 'electron-updater';
 import { BrowserWindow, dialog } from 'electron';
 
 let mainWindow: BrowserWindow | null = null;
+let autoUpdater: any = null;
+
+/**
+ * Try to load electron-updater dynamically
+ */
+function loadAutoUpdater(): boolean {
+  try {
+    const updaterModule = require('electron-updater');
+    autoUpdater = updaterModule.autoUpdater;
+    return true;
+  } catch (error) {
+    console.warn('[AutoUpdater] electron-updater not available, auto-update disabled');
+    return false;
+  }
+}
 
 /**
  * Setup auto-updater
  */
 export function setupAutoUpdater(window: BrowserWindow): void {
+  if (!loadAutoUpdater()) {
+    return;
+  }
+
   mainWindow = window;
 
   // Configure auto-updater
@@ -15,10 +33,10 @@ export function setupAutoUpdater(window: BrowserWindow): void {
 
   // Log updates
   autoUpdater.logger = {
-    info: (message) => console.log('[AutoUpdater]', message),
-    warn: (message) => console.warn('[AutoUpdater]', message),
-    error: (message) => console.error('[AutoUpdater]', message),
-    debug: (message) => console.log('[AutoUpdater Debug]', message),
+    info: (message: any) => console.log('[AutoUpdater]', message),
+    warn: (message: any) => console.warn('[AutoUpdater]', message),
+    error: (message: any) => console.error('[AutoUpdater]', message),
+    debug: (message: any) => console.log('[AutoUpdater Debug]', message),
   };
 
   // Event handlers
@@ -27,7 +45,7 @@ export function setupAutoUpdater(window: BrowserWindow): void {
     sendStatusToWindow('checking-for-update');
   });
 
-  autoUpdater.on('update-available', (info) => {
+  autoUpdater.on('update-available', (info: any) => {
     console.log('[AutoUpdater] Update available:', info.version);
     sendStatusToWindow('update-available', info);
 
@@ -47,23 +65,23 @@ export function setupAutoUpdater(window: BrowserWindow): void {
       });
   });
 
-  autoUpdater.on('update-not-available', (info) => {
+  autoUpdater.on('update-not-available', (info: any) => {
     console.log('[AutoUpdater] No updates available');
     sendStatusToWindow('update-not-available', info);
   });
 
-  autoUpdater.on('error', (error) => {
+  autoUpdater.on('error', (error: Error) => {
     console.error('[AutoUpdater] Error:', error);
     sendStatusToWindow('error', { message: error.message });
   });
 
-  autoUpdater.on('download-progress', (progressObj) => {
+  autoUpdater.on('download-progress', (progressObj: any) => {
     const logMessage = `Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent.toFixed(2)}%`;
     console.log('[AutoUpdater]', logMessage);
     sendStatusToWindow('download-progress', progressObj);
   });
 
-  autoUpdater.on('update-downloaded', (info) => {
+  autoUpdater.on('update-downloaded', (info: any) => {
     console.log('[AutoUpdater] Update downloaded:', info.version);
     sendStatusToWindow('update-downloaded', info);
 
@@ -101,7 +119,12 @@ function sendStatusToWindow(status: string, data?: any): void {
 /**
  * Manually check for updates
  */
-export async function checkForUpdates(): Promise<UpdateCheckResult | null> {
+export async function checkForUpdates(): Promise<any | null> {
+  if (!autoUpdater) {
+    console.warn('[AutoUpdater] Auto-updater not available');
+    return null;
+  }
+
   try {
     return await autoUpdater.checkForUpdates();
   } catch (error) {

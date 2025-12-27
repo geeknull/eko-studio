@@ -82,12 +82,69 @@ export const useSSE = ({
       if (onConnectRef.current) onConnectRef.current();
     };
 
-    eventSource.onerror = (error) => {
+    eventSource.onerror = async (error) => {
       console.error('[SSE] Connection error:', error);
+
+      // If connection failed immediately, try to get error details via fetch
+      if (eventSource.readyState === EventSource.CLOSED) {
+        try {
+          const response = await fetch(targetUrl);
+          if (!response.ok) {
+            const contentType = response.headers.get('content-type');
+            let errorDetail = `HTTP ${response.status}`;
+
+            if (contentType?.includes('text/event-stream')) {
+              const text = await response.text();
+              const dataMatch = text.match(/data:\s*(.+)/);
+              if (dataMatch) {
+                try {
+                  const errorData = JSON.parse(dataMatch[1]);
+                  errorDetail = errorData.message || errorData.error || errorDetail;
+                } catch {
+                  errorDetail = dataMatch[1];
+                }
+              }
+            }
+
+            console.error(`[SSE] Server error details: ${errorDetail}`);
+
+            // Show notification
+            import('antd').then(({ notification }) => {
+              notification.error({
+                message: 'SSE Connection Error',
+                description: errorDetail,
+                duration: 0,
+              });
+            });
+          }
+        } catch (fetchError) {
+          console.error('[SSE] Failed to fetch error details:', fetchError);
+        }
+      }
+
       if (onErrorRef.current) onErrorRef.current(error);
-      // EventSource defaults to auto-reconnect, but we might want to handle it manually
-      // cleanup('Error')
     };
+
+    // Listen for server-sent error events (contains detailed error info)
+    eventSource.addEventListener('error', (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.error('[SSE] Server error event:', data);
+        // Show error via notification
+        if (data.error || data.message) {
+          const errorMessage = data.message || data.error;
+          import('antd').then(({ notification }) => {
+            notification.error({
+              message: 'Server Error',
+              description: errorMessage,
+              duration: 0,
+            });
+          });
+        }
+      } catch (e) {
+        // Not a JSON message, ignore
+      }
+    });
 
     eventSource.onmessage = (event) => {
       try {
