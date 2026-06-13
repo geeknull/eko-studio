@@ -73,13 +73,16 @@ function copyDir(src, dest) {
       const linkTarget = fs.readlinkSync(srcPath);
       try {
         fs.symlinkSync(linkTarget, destPath);
-      } catch (e) {
+      }
+      catch (e) {
         // Symlink may already exist
         if (e.code !== 'EEXIST') throw e;
       }
-    } else if (entry.isDirectory()) {
+    }
+    else if (entry.isDirectory()) {
       copyDir(srcPath, destPath);
-    } else if (entry.isFile()) {
+    }
+    else if (entry.isFile()) {
       fs.copyFileSync(srcPath, destPath);
       // Preserve executable permissions
       const stats = fs.statSync(srcPath);
@@ -94,7 +97,8 @@ async function main() {
   console.log('[Copy Browsers] Ensuring Playwright browsers are installed...');
   try {
     execSync('npx playwright install chromium', { stdio: 'inherit', cwd: PROJECT_ROOT });
-  } catch (error) {
+  }
+  catch {
     console.warn('[Copy Browsers] Warning: Could not install Playwright browsers');
   }
 

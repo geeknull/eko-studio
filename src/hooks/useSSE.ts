@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useCallback, useState } from 'react';
-import { SseEventData, AgentMessageEvent, TextMessageEvent, ConnectedEvent, CompleteEvent, StreamCallbackMessage } from '../types';
+import { SseEventData, AgentMessageEvent } from '../types';
 import { useChatStore } from '@/store/chatStore';
 
 interface UseSSEOptions {
@@ -100,7 +100,8 @@ export const useSSE = ({
                 try {
                   const errorData = JSON.parse(dataMatch[1]);
                   errorDetail = errorData.message || errorData.error || errorDetail;
-                } catch {
+                }
+                catch {
                   errorDetail = dataMatch[1];
                 }
               }
@@ -117,7 +118,8 @@ export const useSSE = ({
               });
             });
           }
-        } catch (fetchError) {
+        }
+        catch (fetchError) {
           console.error('[SSE] Failed to fetch error details:', fetchError);
         }
       }
@@ -141,7 +143,8 @@ export const useSSE = ({
             });
           });
         }
-      } catch (e) {
+      }
+      catch {
         // Not a JSON message, ignore
       }
     });
@@ -153,7 +156,7 @@ export const useSSE = ({
         try {
           data = JSON.parse(event.data);
         }
-        catch (e) {
+        catch {
           // Handle plain text data format
           // Check if it matches our expected format even if not valid JSON initially
           console.log('[SSE] Received raw data:', event.data);

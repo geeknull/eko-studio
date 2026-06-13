@@ -20,7 +20,7 @@ export function getPlaywrightBrowserPath(): string | undefined {
   }
 
   const entries = fs.readdirSync(browsersDir);
-  const chromiumDir = entries.find((entry) => entry.startsWith('chromium-'));
+  const chromiumDir = entries.find(entry => entry.startsWith('chromium-'));
 
   if (!chromiumDir) {
     console.warn('[Playwright] Chromium directory not found in:', browsersDir);
@@ -41,7 +41,7 @@ export function getPlaywrightBrowserPath(): string | undefined {
         'Chromium.app',
         'Contents',
         'MacOS',
-        'Chromium'
+        'Chromium',
       );
       break;
 

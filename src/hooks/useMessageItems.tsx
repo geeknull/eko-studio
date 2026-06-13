@@ -23,7 +23,7 @@ export const useMessageItems = (
     content: message.content,
     avatar: <Avatar icon={message.role === 'user' ? <UserOutlined /> : <RobotOutlined />} />,
     contentRender: message.type === 'eko' && typeof message.content !== 'string'
-      ? (content: any) => <MessageRenderer content={content as StreamCallbackMessage} />
+      ? (content: unknown) => <MessageRenderer content={content as StreamCallbackMessage} />
       : undefined,
     footer: (
       <div style={{

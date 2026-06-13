@@ -27,7 +27,7 @@ interface AgentResultRendererProps {
       xml: string
     }
     result?: string
-    error?: any
+    error?: unknown
   }
 }
 

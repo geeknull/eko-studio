@@ -21,8 +21,9 @@ export function ServerErrorNotification() {
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-all',
               margin: 0,
-              fontFamily: 'Monaco, Menlo, monospace'
-            }}>
+              fontFamily: 'Monaco, Menlo, monospace',
+            }}
+            >
               {error}
             </pre>
           </div>

@@ -13,7 +13,7 @@ interface ToolRendererProps {
     toolId: string
     toolName: string
     paramsText?: string // tool_streaming 使用
-    params?: Record<string, any> // tool_use, tool_result 使用
+    params?: Record<string, unknown> // tool_use, tool_result 使用
     toolResult?: { // tool_result 使用
       content: Array<{
         type: string
@@ -54,7 +54,7 @@ export const ToolRenderer: React.FC<ToolRendererProps> = React.memo(({
         const parsed = JSON.parse(paramsText);
         return JSON.stringify(parsed, null, 2);
       }
-      catch (e) {
+      catch {
         return paramsText; // Return original text if not valid JSON
       }
     }
@@ -79,7 +79,7 @@ export const ToolRenderer: React.FC<ToolRendererProps> = React.memo(({
       const parsed = JSON.parse(allText);
       return JSON.stringify(parsed, null, 2);
     }
-    catch (e) {
+    catch {
       return allText; // Return original text if not JSON
     }
   }, [toolResult]);

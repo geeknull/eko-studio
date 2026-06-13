@@ -33,15 +33,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
 declare global {
   interface Window {
     electronAPI: {
-      getAppVersion: () => Promise<string>;
-      getAppPath: (name: string) => Promise<string>;
-      isPackaged: () => Promise<boolean>;
-      getLogPath: () => Promise<string>;
-      checkForUpdates: () => Promise<any>;
-      onUpdateStatus: (callback: (event: IpcRendererEvent, data: any) => void) => () => void;
-      onServerError: (callback: (event: IpcRendererEvent, error: string) => void) => () => void;
-      platform: NodeJS.Platform;
-      arch: string;
-    };
+      getAppVersion: () => Promise<string>
+      getAppPath: (name: string) => Promise<string>
+      isPackaged: () => Promise<boolean>
+      getLogPath: () => Promise<string>
+      checkForUpdates: () => Promise<any>
+      onUpdateStatus: (callback: (event: IpcRendererEvent, data: any) => void) => () => void
+      onServerError: (callback: (event: IpcRendererEvent, error: string) => void) => () => void
+      platform: NodeJS.Platform
+      arch: string
+    }
   }
 }

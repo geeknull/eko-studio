@@ -49,7 +49,7 @@ const QUEUE_CONFIG = {
 };
 
 // Declare function reference (assigned later)
-let processNextMessage: () => void;
+let processNextMessage: () => void = () => {};
 
 // Statistics
 let totalProcessed = 0; // Total messages processed
@@ -303,7 +303,7 @@ processNextMessage = () => {
 
 // Expose store to window object in development for debugging
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  ;(window as any).chatStore = useChatStore;
+  ;(window as unknown as { chatStore: typeof useChatStore }).chatStore = useChatStore;
   console.log('💡 Dev Mode: chatStore mounted to window.chatStore, usage:');
   console.log('  - window.chatStore.getState() // Get current state');
   console.log('  - window.chatStore.getState().messages // Get message list');

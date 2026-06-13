@@ -20,14 +20,14 @@ export const DefaultRenderer: React.FC<DefaultRendererProps> = React.memo(({
 
   // Extract text content from message (if any)
   const hasTextContent = 'text' in content && content.text;
-  const textContent = hasTextContent ? (content as any).text : null;
+  const textContent = hasTextContent ? (content as { text?: string }).text : null;
 
   // Filter out basic fields, show only special content
   const contentWithoutBasicFields = { ...content };
-  delete (contentWithoutBasicFields as any).taskId;
-  delete (contentWithoutBasicFields as any).agentName;
-  delete (contentWithoutBasicFields as any).type;
-  delete (contentWithoutBasicFields as any).nodeId;
+  delete (contentWithoutBasicFields as Record<string, unknown>).taskId;
+  delete (contentWithoutBasicFields as Record<string, unknown>).agentName;
+  delete (contentWithoutBasicFields as Record<string, unknown>).type;
+  delete (contentWithoutBasicFields as Record<string, unknown>).nodeId;
 
   const hasAdditionalContent = Object.keys(contentWithoutBasicFields).length > 0;
 

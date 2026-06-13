@@ -1,7 +1,6 @@
 import React from 'react';
-import { Tag, Typography, Space, Collapse } from 'antd';
+import { Tag, Typography, Space } from 'antd';
 import { StreamCallbackMessage } from '../../types';
-import { LazySyntaxHighlighter } from '../base/LazySyntaxHighlighter';
 import { WorkflowRenderer } from './renderers/WorkflowRenderer';
 import { AgentStartRenderer } from './renderers/AgentStartRenderer';
 import { AgentResultRenderer } from './renderers/AgentResultRenderer';
@@ -12,7 +11,7 @@ import { FileRenderer } from './renderers/FileRenderer';
 import { ErrorRenderer } from './renderers/ErrorRenderer';
 import { DefaultRenderer } from './renderers/DefaultRenderer';
 
-const { Text, Paragraph } = Typography;
+const { Text } = Typography;
 
 interface MessageRendererProps {
   content: StreamCallbackMessage
@@ -32,27 +31,27 @@ export const MessageRenderer: React.FC<MessageRendererProps> = React.memo(({ con
     }
 
     if (type === 'agent_result') {
-      return <AgentResultRenderer content={content as any} />;
+      return <AgentResultRenderer content={content as React.ComponentProps<typeof AgentResultRenderer>['content']} />;
     }
 
     if (type === 'thinking' || type === 'text') {
-      return <ThinkingRenderer content={content as any} />;
+      return <ThinkingRenderer content={content as React.ComponentProps<typeof ThinkingRenderer>['content']} />;
     }
 
     if (type === 'tool_streaming' || type === 'tool_use' || type === 'tool_result' || type === 'tool_running') {
-      return <ToolRenderer content={content as any} />;
+      return <ToolRenderer content={content as React.ComponentProps<typeof ToolRenderer>['content']} />;
     }
 
     if (type === 'finish') {
-      return <FinishRenderer content={content as any} />;
+      return <FinishRenderer content={content as React.ComponentProps<typeof FinishRenderer>['content']} />;
     }
 
     if (type === 'file') {
-      return <FileRenderer content={content as any} />;
+      return <FileRenderer content={content as React.ComponentProps<typeof FileRenderer>['content']} />;
     }
 
     if (type === 'error') {
-      return <ErrorRenderer content={content as any} />;
+      return <ErrorRenderer content={content as React.ComponentProps<typeof ErrorRenderer>['content']} />;
     }
 
     // Fallback renderer: handle unknown types

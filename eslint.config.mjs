@@ -18,6 +18,17 @@ const eslintConfig = defineConfig([
       '@stylistic/comma-dangle': ['error', 'always-multiline'],
     },
   },
+  {
+    // Electron main/preload and Node build scripts are an untyped boundary:
+    // dynamic/optional require(), stringly-typed IPC channel payloads, and the
+    // dynamically loaded electron-updater have no static types. Relax these two
+    // rules here only — the Next app under src/ stays fully typed.
+    files: ['electron/**/*.{ts,tsx}', 'scripts/**/*.js'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
