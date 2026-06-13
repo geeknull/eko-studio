@@ -143,12 +143,18 @@ function ToolRenderer({ content }: { content: StreamCallbackMessage }) {
     }
   }
 
-  // Collect output text from toolResult
+  // Collect output text from toolResult. NOTE: only text-type results are shown;
+  // image-type tool results (toolResult.content[].type === 'image') are skipped
+  // here — see PoC findings (AI Elements ToolOutput is text/JSON oriented).
   const outputText = m.toolResult?.content
     ?.filter(c => c.type === 'text')
     .map(c => c.text)
     .join('\n');
 
+  // Map our flags to AI Elements' ToolUIPart state enum:
+  // tool_streaming (streamDone === false) -> input-streaming;
+  // tool_result (has outputText)          -> output-available;
+  // tool_use (no result yet)              -> input-available.
   const toolState: 'input-streaming' | 'input-available' | 'output-available'
     = m.streamDone === false
       ? 'input-streaming'
@@ -206,7 +212,7 @@ function FileRenderer({ content }: { content: StreamCallbackMessage }) {
       ? 'json'
       : mimeType.includes('xml')
         ? 'xml'
-        : 'plaintext'
+        : 'text'
   ) as BundledLanguage;
 
   return <CodeBlock code={decoded} language={language} />;
@@ -283,6 +289,13 @@ function AgentRenderer({ content }: { content: StreamCallbackMessage }) {
             </span>
             {' '}
             {m.result}
+          </p>
+        )}
+        {m.error != null && (
+          <p className="text-destructive">
+            <span className="font-medium">Error:</span>
+            {' '}
+            {typeof m.error === 'string' ? m.error : JSON.stringify(m.error)}
           </p>
         )}
       </CardContent>
