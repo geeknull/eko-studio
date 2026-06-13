@@ -5,6 +5,7 @@
 
 import { LogPlayerSSEAdapter } from '@/agent/logger';
 import * as path from 'path';
+import { logger } from '@/utils/logger';
 
 /**
  * SSE Event Type
@@ -46,7 +47,7 @@ export async function handleReplay(
     fixedInterval = 1000,
   } = options;
 
-  console.log('[Replay Handler] Starting replay with options:', {
+  logger.log('[Replay Handler] Starting replay with options:', {
     taskId,
     logFile,
     playbackMode,
@@ -61,12 +62,12 @@ export async function handleReplay(
   if (logFile) {
     // Use specified log file
     logFilePath = path.join(logDir, logFile);
-    console.log('[Replay Handler] Using specified log file:', logFilePath);
+    logger.log('[Replay Handler] Using specified log file:', logFilePath);
   }
   else {
     // Use latest log file
     logFilePath = LogPlayerSSEAdapter.getLatestLog(logDir);
-    console.log('[Replay Handler] Using latest log file:', logFilePath);
+    logger.log('[Replay Handler] Using latest log file:', logFilePath);
   }
 
   if (!logFilePath) {
@@ -81,7 +82,7 @@ export async function handleReplay(
     fixedInterval,
 
     onStart: async (summary) => {
-      console.log(`[Replay Handler] Started: ${summary.totalMessages} messages, ${summary.duration}ms`);
+      logger.log(`[Replay Handler] Started: ${summary.totalMessages} messages, ${summary.duration}ms`);
 
       // Send replay information
       controller.enqueue(
@@ -126,20 +127,20 @@ export async function handleReplay(
           error.message.includes('Invalid state')
           || error.message.includes('Controller is already closed')
         )) {
-          console.warn('[Replay Handler] SSE connection closed by client');
+          logger.warn('[Replay Handler] SSE connection closed by client');
         }
         else {
-          console.error('[Replay Handler] Error sending message:', error);
+          logger.error('[Replay Handler] Error sending message:', error);
         }
       }
     },
 
     onComplete: async () => {
-      console.log('[Replay Handler] Completed');
+      logger.log('[Replay Handler] Completed');
     },
 
     onError: async (error) => {
-      console.error('[Replay Handler] Error:', error);
+      logger.error('[Replay Handler] Error:', error);
       throw error;
     },
   });
@@ -159,5 +160,5 @@ export async function handleReplay(
     ),
   );
 
-  console.log('[Replay Handler] Finished successfully');
+  logger.log('[Replay Handler] Finished successfully');
 }

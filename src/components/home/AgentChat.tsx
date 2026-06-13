@@ -8,6 +8,7 @@ import { useChatStore, ChatMessage } from '@/store/chatStore';
 import { useConfigStore } from '@/store';
 import { useSSE } from '@/hooks/useSSE';
 import { useMessageItems } from '@/hooks/useMessageItems';
+import { logger } from '@/utils/logger';
 
 interface AgentChatProps {
   onViewJson: (message: ChatMessage) => void
@@ -36,7 +37,7 @@ export const AgentChat: React.FC<AgentChatProps> = ({
     },
     onError: (error) => {
       setLoading(false);
-      console.error('SSE Error:', error);
+      logger.error('SSE Error:', error);
       message.error('Connection interrupted, please retry');
     },
   });
@@ -116,7 +117,7 @@ export const AgentChat: React.FC<AgentChatProps> = ({
       }
     }
     catch (error) {
-      console.error('Failed to start agent:', error);
+      logger.error('Failed to start agent:', error);
       setLoading(false);
       addAssistantMessage(
         `Error: Failed to start agent. ${error instanceof Error ? error.message : String(error)}`,

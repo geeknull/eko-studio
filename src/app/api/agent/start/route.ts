@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { agentStart, validateQuery } from '@/app/api/agent/service';
+import { logger } from '@/utils/logger';
 import type { AgentStartResponse } from '@/app/api/agent/types';
 
 /**
@@ -33,7 +34,7 @@ async function processAgentStart(
     }
   }
 
-  console.log('isNodeRuntime-agentStart', process?.release?.name === 'node');
+  logger.log('isNodeRuntime-agentStart', process?.release?.name === 'node');
   // Start agent task and get task ID (use empty string if query is not provided)
   const result = await agentStart(query || '', params);
 
@@ -51,7 +52,7 @@ async function processAgentStart(
  * Common error response handler
  */
 function errorResponse(error: unknown, method: string): Response {
-  console.error(`Agent Start API Error (${method}):`, error);
+  logger.error(`Agent Start API Error (${method}):`, error);
 
   return NextResponse.json(
     {

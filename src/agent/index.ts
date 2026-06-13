@@ -1,6 +1,7 @@
 import { createRequire } from 'module';
 import { Eko, Agent, Log, LLMs, StreamCallbackMessage } from '@eko-ai/eko';
 import { AgentLogger } from './logger';
+import { logger } from '@/utils/logger';
 import type { NormalConfig } from '@/types';
 
 export const runtime = 'nodejs';
@@ -19,7 +20,7 @@ function getPlaywrightExecutablePath(): string | undefined {
   // Check if running in Electron production environment
   const chromiumPath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
   if (chromiumPath) {
-    console.log('[Agent] Using custom Chromium path:', chromiumPath);
+    logger.log('[Agent] Using custom Chromium path:', chromiumPath);
     return chromiumPath;
   }
 
@@ -32,7 +33,7 @@ const openrouterBaseURL = process.env.OPENROUTER_BASE_URL;
 // Model is configurable via env; defaults to a cheap vision+tools model for testing
 const openrouterModel = process.env.OPENROUTER_MODEL || 'openai/gpt-5-nano';
 // Do NOT log the API key itself — only whether it is present
-console.log('[Agent] OpenRouter configured:', {
+logger.log('[Agent] OpenRouter configured:', {
   hasApiKey: Boolean(openrouterApiKey),
   baseURL: openrouterBaseURL,
   model: openrouterModel,
@@ -59,7 +60,7 @@ type Callback = {
 
 const _callback: Callback = {
   onMessage: async (message: StreamCallbackMessage) => {
-    console.log('eko-message: ', JSON.stringify(message, null, 2));
+    logger.log('eko-message: ', JSON.stringify(message, null, 2));
   },
 };
 const _query = 'Summarize the single most important news story of today.';
@@ -94,7 +95,7 @@ export async function run(options?: {
     };
   }
   // Log the resolved LLM config WITHOUT leaking the API key
-  console.log('[Agent] LLM:', {
+  logger.log('[Agent] LLM:', {
     source: normalConfig?.llm ? 'normalConfig' : 'default',
     provider: llms.default.provider,
     model: llms.default.model,
@@ -126,14 +127,15 @@ export async function run(options?: {
     if (normalConfig.agents.includes('BrowserAgent')) {
       agents.push(createBrowserAgent());
     }
-    console.log('Using normalConfig agents:', normalConfig.agents);
+    logger.log('Using normalConfig agents:', normalConfig.agents);
   }
   else {
-    console.log('Using default agents: BrowserAgent');
+    logger.log('Using default agents: BrowserAgent');
   }
 
-  // Initialize logger
-  const logger = new AgentLogger({
+  // Initialize the file logger (records the agent's stream messages to disk).
+  // Named `agentLogger` to avoid clashing with the imported console `logger`.
+  const agentLogger = new AgentLogger({
     modelName: llms.default.model,
     enabled: enableLog,
   });
@@ -142,7 +144,7 @@ export async function run(options?: {
   const wrappedCallback: Callback = {
     onMessage: async (message: StreamCallbackMessage) => {
       // Log first
-      await logger.log(message);
+      await agentLogger.log(message);
 
       // Then call original callback
       await callback.onMessage(message);
@@ -154,16 +156,16 @@ export async function run(options?: {
     const eko = new Eko({ llms, agents, callback: wrappedCallback });
     const result = await eko.run(query);
 
-    console.log('result: ', result.result);
+    logger.log('result: ', result.result);
 
-    if (logger.isEnabled()) {
-      console.log(`Log saved to: ${logger.getLogFilePath()}`);
-      console.log(`Total messages: ${logger.getMessageCount()}`);
+    if (agentLogger.isEnabled()) {
+      logger.log(`Log saved to: ${agentLogger.getLogFilePath()}`);
+      logger.log(`Total messages: ${agentLogger.getMessageCount()}`);
     }
 
     return result;
   }
   finally {
-    await logger.close();
+    await agentLogger.close();
   }
 }

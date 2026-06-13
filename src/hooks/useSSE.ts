@@ -3,6 +3,7 @@
 import { useRef, useEffect, useCallback, useState } from 'react';
 import { SseEventData, AgentMessageEvent } from '../types';
 import { useChatStore } from '@/store/chatStore';
+import { logger } from '@/utils/logger';
 
 interface UseSSEOptions {
   url: string
@@ -12,7 +13,7 @@ interface UseSSEOptions {
 }
 
 // Type guard: Check if it's an Agent message event
-const isAgentMessage = (d: SseEventData): d is AgentMessageEvent => {
+export const isAgentMessage = (d: SseEventData): d is AgentMessageEvent => {
   return 'time' in d && 'timestamp' in d && 'content' in d && !('type' in d);
 };
 
@@ -43,7 +44,7 @@ export const useSSE = ({
 
   const cleanup = useCallback((reason?: string) => {
     if (eventSourceRef.current) {
-      console.log(`[SSE] Closing connection. Reason: ${reason || 'Unknown'}. Total messages received: ${messageCountRef.current}`);
+      logger.log(`[SSE] Closing connection. Reason: ${reason || 'Unknown'}. Total messages received: ${messageCountRef.current}`);
       eventSourceRef.current.close();
       eventSourceRef.current = null;
       setIsConnected(false);
@@ -56,13 +57,13 @@ export const useSSE = ({
     const targetUrl = overrideUrl || url;
 
     if (!targetUrl) {
-      console.warn('[SSE] No URL provided');
+      logger.warn('[SSE] No URL provided');
       return;
     }
 
     // If already connected to the same URL and readyState is not CLOSED, do nothing
     if (eventSourceRef.current && eventSourceRef.current.url === targetUrl && eventSourceRef.current.readyState !== EventSource.CLOSED) {
-      console.warn('[SSE] Already connected to this URL');
+      logger.warn('[SSE] Already connected to this URL');
       return;
     }
 
@@ -71,19 +72,19 @@ export const useSSE = ({
       cleanup('Switching URL');
     }
 
-    console.log(`[SSE] Connecting to ${targetUrl}...`);
+    logger.log(`[SSE] Connecting to ${targetUrl}...`);
     const eventSource = new EventSource(targetUrl);
     eventSourceRef.current = eventSource;
     messageCountRef.current = 0;
 
     eventSource.onopen = () => {
-      console.log('[SSE] Connection established');
+      logger.log('[SSE] Connection established');
       setIsConnected(true);
       if (onConnectRef.current) onConnectRef.current();
     };
 
     eventSource.onerror = async (error) => {
-      console.error('[SSE] Connection error:', error);
+      logger.error('[SSE] Connection error:', error);
 
       // If connection failed immediately, try to get error details via fetch
       if (eventSource.readyState === EventSource.CLOSED) {
@@ -107,7 +108,7 @@ export const useSSE = ({
               }
             }
 
-            console.error(`[SSE] Server error details: ${errorDetail}`);
+            logger.error(`[SSE] Server error details: ${errorDetail}`);
 
             // Show notification
             import('antd').then(({ notification }) => {
@@ -120,7 +121,7 @@ export const useSSE = ({
           }
         }
         catch (fetchError) {
-          console.error('[SSE] Failed to fetch error details:', fetchError);
+          logger.error('[SSE] Failed to fetch error details:', fetchError);
         }
       }
 
@@ -131,7 +132,7 @@ export const useSSE = ({
     eventSource.addEventListener('error', (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
-        console.error('[SSE] Server error event:', data);
+        logger.error('[SSE] Server error event:', data);
         // Show error via notification
         if (data.error || data.message) {
           const errorMessage = data.message || data.error;
@@ -159,7 +160,7 @@ export const useSSE = ({
         catch {
           // Handle plain text data format
           // Check if it matches our expected format even if not valid JSON initially
-          console.log('[SSE] Received raw data:', event.data);
+          logger.log('[SSE] Received raw data:', event.data);
           return;
         }
 
@@ -170,7 +171,7 @@ export const useSSE = ({
       catch (error) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const _unused = error; // suppress unused warning if needed, but we log it
-        console.error('[SSE] Error parsing message:', error);
+        logger.error('[SSE] Error parsing message:', error);
       }
     };
   }, [url, cleanup, addAssistantMessage]);

@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { logger } from '@/utils/logger';
 import type { AgentStartResponse } from './types';
 
 /**
@@ -13,8 +14,12 @@ interface TaskInfo {
 }
 
 /**
- * In-memory task storage
- * TODO: Replace with database or cache (Redis) in production
+ * In-memory task storage.
+ *
+ * Intentional: Eko Studio is a single-instance deployment (primarily an Electron
+ * desktop app), so process-local state is correct here — `/start` and `/stream`
+ * requests always hit the same process. Only move to shared storage (Redis, etc.)
+ * if this is ever deployed across multiple horizontally-scaled instances.
  */
 const taskStore = new Map<string, TaskInfo>();
 
@@ -73,7 +78,7 @@ export function updateTaskStatus(
  * Clean up completed tasks (optional, for memory management)
  */
 export function cleanupTask(taskId: string): void {
-  console.log(`[cleanupTask] Removing taskId: ${taskId} at ${new Date().toISOString()}`);
+  logger.log(`[cleanupTask] Removing taskId: ${taskId} at ${new Date().toISOString()}`);
   taskStore.delete(taskId);
 }
 

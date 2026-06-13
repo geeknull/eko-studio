@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { StreamCallbackMessage } from '../types';
+import { logger } from '@/utils/logger';
 import {
   shouldMergeByAgentNameAndType,
   mergeMessagesByAgentNameAndType,
@@ -87,7 +88,7 @@ export const useChatStore = create<ChatState>(set => ({
 
     // Queue length hint (informational only)
     if (messageQueue.length % 100 === 0) {
-      console.log(`📊 Queue status: pending ${messageQueue.length}, processed ${totalProcessed}`);
+      logger.log(`📊 Queue status: pending ${messageQueue.length}, processed ${totalProcessed}`);
     }
 
     // Schedule processing (debounce to avoid frequent triggers)
@@ -131,7 +132,7 @@ export const useChatStore = create<ChatState>(set => ({
       clearTimeout(processingTimer);
       processingTimer = null;
     }
-    console.log('🔄 Messages and queue cleared');
+    logger.log('🔄 Messages and queue cleared');
 
     set({
       messages: [],
@@ -277,7 +278,7 @@ processNextMessage = () => {
         : queueLength >= QUEUE_CONFIG.THRESHOLD_LARGE
           ? '🟡 Backlog'
           : '🟢 Normal';
-      console.log(`${status} Batch: ${processedCount} msgs | Batch Size: ${batchSize} | Queue Left: ${messageQueue.length} | Total Processed: ${totalProcessed}`);
+      logger.log(`${status} Batch: ${processedCount} msgs | Batch Size: ${batchSize} | Queue Left: ${messageQueue.length} | Total Processed: ${totalProcessed}`);
     }
   }
   finally {
@@ -296,7 +297,7 @@ processNextMessage = () => {
     }
     else {
       // Log summary when queue is empty
-      console.log(`✅ Queue cleared, total processed ${totalProcessed} messages`);
+      logger.log(`✅ Queue cleared, total processed ${totalProcessed} messages`);
     }
   }
 };
@@ -304,8 +305,8 @@ processNextMessage = () => {
 // Expose store to window object in development for debugging
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   ;(window as unknown as { chatStore: typeof useChatStore }).chatStore = useChatStore;
-  console.log('💡 Dev Mode: chatStore mounted to window.chatStore, usage:');
-  console.log('  - window.chatStore.getState() // Get current state');
-  console.log('  - window.chatStore.getState().messages // Get message list');
-  console.log('  - window.chatStore.getState().clearMessages() // Clear messages');
+  logger.log('💡 Dev Mode: chatStore mounted to window.chatStore, usage:');
+  logger.log('  - window.chatStore.getState() // Get current state');
+  logger.log('  - window.chatStore.getState().messages // Get message list');
+  logger.log('  - window.chatStore.getState().clearMessages() // Clear messages');
 }
