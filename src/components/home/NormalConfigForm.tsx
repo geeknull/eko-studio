@@ -22,11 +22,12 @@ export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({
 }) => {
   const isDevEnv = isDevelopment();
 
-  // Filter out BrowserAgent and FileAgent from initial values if not in development environment
+  // Filter out BrowserAgent from initial values if not in development environment
+  // (FileAgent was removed in eko 4.x, so AgentType only contains 'BrowserAgent')
   React.useEffect(() => {
     if (!isDevEnv && initialValues?.agents) {
       const filteredAgents = initialValues.agents.filter(
-        agent => agent !== 'FileAgent' && agent !== 'BrowserAgent',
+        agent => agent !== 'BrowserAgent',
       );
       if (filteredAgents.length !== initialValues.agents.length) {
         form.setFieldValue('agents', filteredAgents);
@@ -38,7 +39,8 @@ export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({
     { value: 'openai', label: 'OpenAI' },
     { value: 'anthropic', label: 'Anthropic' },
     { value: 'google', label: 'Google' },
-    { value: 'aws', label: 'AWS Bedrock' },
+    { value: 'bedrock', label: 'AWS Bedrock' },
+    { value: 'azure', label: 'Azure OpenAI' },
     { value: 'openrouter', label: 'OpenRouter' },
     { value: 'openai-compatible', label: 'OpenAI Compatible' },
     { value: 'modelscope', label: 'ModelScope' },

@@ -29,14 +29,20 @@ function getPlaywrightExecutablePath(): string | undefined {
 
 const openrouterApiKey = process.env.OPENROUTER_API_KEY;
 const openrouterBaseURL = process.env.OPENROUTER_BASE_URL;
-console.log('openrouterApiKey', openrouterApiKey);
-console.log('openrouterBaseURL', openrouterBaseURL);
+// Model is configurable via env; defaults to a cheap vision+tools model for testing
+const openrouterModel = process.env.OPENROUTER_MODEL || 'openai/gpt-5-nano';
+// Do NOT log the API key itself — only whether it is present
+console.log('[Agent] OpenRouter configured:', {
+  hasApiKey: Boolean(openrouterApiKey),
+  baseURL: openrouterBaseURL,
+  model: openrouterModel,
+});
 
 // Default LLM configuration (fallback)
 const defaultLLMs: LLMs = {
   default: {
     provider: 'openrouter',
-    model: 'openai/gpt-5-nano',
+    model: openrouterModel,
     apiKey: openrouterApiKey || '',
     config: {
       baseURL: openrouterBaseURL,
@@ -97,15 +103,24 @@ export async function run(options?: {
 
   // Get Chromium executable path for Electron environment
   const executablePath = getPlaywrightExecutablePath();
-  const browserOptions = executablePath ? { executablePath } : undefined;
+
+  // BrowserAgent's constructor takes no args; executablePath (Electron prod) is
+  // applied via setOptions(), which flows into chromium.launch({ ...options }).
+  // Type assertion needed: @eko-ai/eko-nodejs Agent differs structurally from core Agent.
+  const createBrowserAgent = (): Agent => {
+    const browserAgent = new BrowserAgent();
+    if (executablePath) {
+      browserAgent.setOptions({ executablePath });
+    }
+    return browserAgent as unknown as Agent;
+  };
 
   // Build agents configuration
-  // Note: Use type assertion due to version mismatch between @eko-ai/eko and @eko-ai/eko-nodejs
-  let agents: Agent[] = [new BrowserAgent(browserOptions) as unknown as Agent];
+  let agents: Agent[] = [createBrowserAgent()];
   if (normalConfig?.agents && normalConfig.agents.length > 0) {
     agents = [];
     if (normalConfig.agents.includes('BrowserAgent')) {
-      agents.push(new BrowserAgent(browserOptions) as unknown as Agent);
+      agents.push(createBrowserAgent());
     }
     console.log('Using normalConfig agents:', normalConfig.agents);
   }

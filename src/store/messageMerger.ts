@@ -1,5 +1,10 @@
-import { StreamCallbackMessage } from '../types';
+import type { StreamCallbackMessage, Workflow } from '../types';
 import type { ChatMessage } from './chatStore';
+
+// In eko 4.x, StreamCallbackMessage is a discriminated union and only the
+// 'workflow'-typed message carries a `workflow` object. These legacy merge
+// helpers treat `workflow` as optional and narrow it at runtime.
+type WorkflowMessage = StreamCallbackMessage & { workflow?: Workflow };
 
 /**
  * Normalized types: Planer -> workflow, Browser -> tool_use
@@ -105,14 +110,16 @@ export function shouldMergeByWorkflowTaskId(
   if (!lastMessage || lastMessage.role !== 'assistant') return false;
 
   // Check if new message has workflow.taskId
-  if (typeof newContent !== 'object' || !newContent.workflow || !newContent.workflow.taskId) {
+  const newWf = newContent as WorkflowMessage;
+  if (typeof newContent !== 'object' || !newWf.workflow || !newWf.workflow.taskId) {
     return false;
   }
 
   // Check if last message has same workflow.taskId
+  const lastWf = lastMessage.content as WorkflowMessage;
   if (typeof lastMessage.content !== 'object'
-    || !lastMessage.content.workflow
-    || lastMessage.content.workflow.taskId !== newContent.workflow.taskId) {
+    || !lastWf.workflow
+    || lastWf.workflow.taskId !== newWf.workflow.taskId) {
     return false;
   }
 
@@ -126,20 +133,21 @@ export function mergeMessagesByWorkflowTaskId(
   lastMessage: ChatMessage,
   newContent: StreamCallbackMessage,
 ): ChatMessage {
-  // At this point, validated by shouldMergeByWorkflowTaskId, lastMessage.content must be StreamCallbackMessage
-  const lastContent = lastMessage.content as StreamCallbackMessage;
+  // At this point, validated by shouldMergeByWorkflowTaskId, both carry a workflow object
+  const lastContent = lastMessage.content as WorkflowMessage;
+  const newWf = newContent as WorkflowMessage;
 
-  const mergedContent: StreamCallbackMessage = {
+  const mergedContent = {
     ...lastContent,
-    ...newContent,
+    ...newWf,
     workflow: {
       ...lastContent.workflow!,
-      ...newContent.workflow!,
-      xml: newContent.workflow.xml !== undefined
-        ? newContent.workflow.xml
-        : lastContent.workflow.xml, // Latter xml overwrites former (if exists)
+      ...newWf.workflow!,
+      xml: newWf.workflow!.xml !== undefined
+        ? newWf.workflow!.xml
+        : lastContent.workflow!.xml, // Latter xml overwrites former (if exists)
     },
-  };
+  } as StreamCallbackMessage;
 
   return {
     ...lastMessage,
