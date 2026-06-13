@@ -11,6 +11,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Opt JS actions into Node 24 ahead of GitHub's 2026-06-16 default switch
+  # (silences the Node 20 deprecation warning; checkout/setup-node/pnpm @v4
+  # already support Node 24).
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   verify:
     name: Lint · Typecheck · Test · Build
