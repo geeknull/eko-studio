@@ -74,7 +74,7 @@ export const useChatStore = create<ChatState>(set => ({
           ...state.messages,
           {
             id: messageId,
-            role: 'assistant',
+            role: 'user',
             content,
           },
         ],
