@@ -4,6 +4,7 @@
  */
 
 import * as fs from 'fs';
+import { logger } from '@/utils/logger';
 import type { LogEntry, LogPlayerOptions, LogPlaybackCallback } from './types';
 
 export class LogPlayer {
@@ -43,7 +44,7 @@ export class LogPlayer {
       // Parse metadata from first line
       const headerParts = lines[0].split('-');
       if (headerParts.length !== 3) {
-        console.warn('Invalid log entry header:', lines[0]);
+        logger.warn('Invalid log entry header:', lines[0]);
         continue;
       }
 
@@ -58,7 +59,7 @@ export class LogPlayer {
         message = JSON.parse(messageJson);
       }
       catch (err) {
-        console.warn('Unable to parse JSON message:', messageJson, err);
+        logger.warn('Unable to parse JSON message:', messageJson, err);
         continue;
       }
 

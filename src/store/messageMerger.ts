@@ -1,5 +1,6 @@
 import type { StreamCallbackMessage, Workflow } from '../types';
 import type { ChatMessage } from './chatStore';
+import { logger } from '@/utils/logger';
 
 // In eko 4.x, StreamCallbackMessage is a discriminated union and only the
 // 'workflow'-typed message carries a `workflow` object. These legacy merge
@@ -176,7 +177,7 @@ export function isSameMessage(
     }
     catch (error) {
       // If serialization fails, assume not same, avoid infinite loop
-      console.warn('Error comparing messages:', error);
+      logger.warn('Error comparing messages:', error);
       return false;
     }
   }

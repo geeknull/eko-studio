@@ -5,6 +5,7 @@
 
 import { run } from '@/agent/index';
 import { updateTaskStatus } from '@/app/api/agent/service';
+import { logger } from '@/utils/logger';
 import type { StreamCallbackMessage } from '@eko-ai/eko';
 import type { NormalConfig } from '@/types';
 
@@ -47,14 +48,14 @@ export async function handleRun(
 ): Promise<void> {
   const { taskId, task } = options;
 
-  console.log('[Run Handler] Starting agent execution for task:', taskId);
+  logger.log('[Run Handler] Starting agent execution for task:', taskId);
 
   // Create callback to send messages to SSE stream
   const callback = {
     onMessage: async (message: StreamCallbackMessage) => {
       try {
         // Send agent message via SSE
-        console.log('eko-message: ', JSON.stringify(message, null, 2));
+        logger.log('eko-message: ', JSON.stringify(message, null, 2));
         const time = new Date();
         controller.enqueue(
           encoder.encode(formatSSEMessage('message', {
@@ -70,10 +71,10 @@ export async function handleRun(
           error.message.includes('Invalid state')
           || error.message.includes('Controller is already closed')
         )) {
-          console.warn('[Run Handler] SSE connection closed by client');
+          logger.warn('[Run Handler] SSE connection closed by client');
         }
         else {
-          console.error('[Run Handler] Error sending SSE message:', error);
+          logger.error('[Run Handler] Error sending SSE message:', error);
         }
       }
     },
@@ -104,5 +105,5 @@ export async function handleRun(
   // Update task status
   updateTaskStatus(taskId, 'completed');
 
-  console.log('[Run Handler] Finished successfully');
+  logger.log('[Run Handler] Finished successfully');
 }

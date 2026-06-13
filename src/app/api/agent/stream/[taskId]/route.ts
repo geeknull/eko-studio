@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { logger } from '@/utils/logger';
 import { getTask, updateTaskStatus, getTaskStoreSize, getAllTaskIds } from '@/app/api/agent/service';
 import { getFixedIntervalConfig, getSpeedConfig, getDefaultReplayConfig } from '@/config/replayConfig';
 import { handleRun } from '../handlers/runHandler';
@@ -50,17 +51,17 @@ export async function GET(
   const speed = parseFloat(searchParams.get('speed') || String(defaultConfig.speed)); // Playback speed
   const fixedInterval = parseInt(searchParams.get('fixedInterval') || String(defaultConfig.fixedInterval), 10); // Fixed interval
 
-  console.log('SSE Request - taskId:', taskId);
-  console.log('SSE Request - mode:', mode);
-  console.log('SSE Request - resolvedParams:', resolvedParams);
+  logger.log('SSE Request - taskId:', taskId);
+  logger.log('SSE Request - mode:', mode);
+  logger.log('SSE Request - resolvedParams:', resolvedParams);
 
   // Get task information
   const task = getTask(taskId);
-  console.log('SSE Request - task found:', !!task);
-  console.log('SSE Request - taskStore size:', getTaskStoreSize());
+  logger.log('SSE Request - task found:', !!task);
+  logger.log('SSE Request - taskStore size:', getTaskStoreSize());
 
   if (!task) {
-    console.error('Task not found:', {
+    logger.error('Task not found:', {
       taskId,
       taskStoreKeys: getAllTaskIds(),
       taskStoreSize: getTaskStoreSize(),
@@ -84,7 +85,7 @@ export async function GET(
 
   // Check if task is already completed or running
   if (task.status === 'completed') {
-    console.log('Task already completed, sending final status');
+    logger.log('Task already completed, sending final status');
     return new Response(
       formatSSEMessage('completed', {
         taskId,
@@ -103,7 +104,7 @@ export async function GET(
   }
 
   if (task.status === 'running') {
-    console.log('Task is already running, rejecting duplicate connection');
+    logger.log('Task is already running, rejecting duplicate connection');
     return new Response(
       formatSSEMessage('error', {
         taskId,
@@ -123,7 +124,7 @@ export async function GET(
   }
 
   if (task.status === 'error') {
-    console.log('Task previously failed, rejecting reconnection');
+    logger.log('Task previously failed, rejecting reconnection');
     return new Response(
       formatSSEMessage('error', {
         taskId,
@@ -219,7 +220,7 @@ export async function GET(
           // ========================================
           // Run mode: Call run handler
           // ========================================
-          console.log('isNodeRuntime', process?.release?.name === 'node');
+          logger.log('isNodeRuntime', process?.release?.name === 'node');
           await handleRun(controller, encoder, {
             taskId,
             task: {
@@ -230,7 +231,7 @@ export async function GET(
         }
       }
       catch (error) {
-        console.error(`[SSE] ${mode} error:`, error);
+        logger.error(`[SSE] ${mode} error:`, error);
 
         // Send error message
         controller.enqueue(
@@ -249,12 +250,12 @@ export async function GET(
       }
       finally {
         // Close the stream
-        console.log(`[SSE] Stream closed for taskId: ${taskId}, mode: ${mode}`);
+        logger.log(`[SSE] Stream closed for taskId: ${taskId}, mode: ${mode}`);
         controller.close();
       }
     },
     cancel(reason) {
-      console.log(`[SSE] Stream cancelled for taskId: ${taskId}`, reason ? `Reason: ${reason}` : '');
+      logger.log(`[SSE] Stream cancelled for taskId: ${taskId}`, reason ? `Reason: ${reason}` : '');
     },
   });
 
