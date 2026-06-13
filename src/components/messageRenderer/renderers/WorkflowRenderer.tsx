@@ -2,7 +2,6 @@ import React from 'react';
 import { Tag, Typography, Space, Collapse } from 'antd';
 import { LoadingOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { ThoughtChain } from '@ant-design/x';
-import type { ThoughtChainProps, ThoughtChainItem } from '@ant-design/x';
 import { LazySyntaxHighlighter } from '../../base/LazySyntaxHighlighter';
 import { WorkflowAgentCard } from '../WorkflowAgentCard';
 import type { StreamCallbackMessage, WorkflowAgent } from '../../../types';
@@ -45,10 +44,8 @@ export const WorkflowRenderer: React.FC<WorkflowRendererProps> = React.memo(({
       <Space orientation="vertical" size="small" style={{ width: '100%', marginTop: '8px' }}>
         {workflow.thought && (
           <ThoughtChain
-            collapsible={{
-              expandedKeys: thoughtExpandedKeys,
-              onExpand: keys => setThoughtExpandedKeys(keys),
-            }}
+            expandedKeys={thoughtExpandedKeys}
+            onExpand={(keys: string[]) => setThoughtExpandedKeys(keys)}
             items={[
               {
                 key: 'thought',
@@ -59,7 +56,7 @@ export const WorkflowRenderer: React.FC<WorkflowRendererProps> = React.memo(({
                     {workflow.thought}
                   </Paragraph>
                 ),
-                status: streamDone ? 'success' : 'pending',
+                status: streamDone ? 'success' : 'loading',
               },
             ]}
           />

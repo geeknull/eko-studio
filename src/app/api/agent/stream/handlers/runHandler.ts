@@ -6,6 +6,7 @@
 import { run } from '@/agent/index';
 import { updateTaskStatus } from '@/app/api/agent/service';
 import type { StreamCallbackMessage } from '@eko-ai/eko';
+import type { NormalConfig } from '@/types';
 
 /**
  * SSE Event Type
@@ -79,7 +80,7 @@ export async function handleRun(
   };
 
   // Extract normalConfig from params if present
-  const normalConfig = task.params?.normalConfig as Record<string, unknown> | undefined;
+  const normalConfig = task.params?.normalConfig as NormalConfig | undefined;
 
   // Run agent
   await run({

@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['canvas', 'playwright', 'playwright-core', 'playwright-extra', 'puppeteer-extra-plugin-stealth', 'chromium-bidi', '@eko-ai/eko-nodejs'],
   /* config options here */
   typescript: {
-    ignoreBuildErrors: true,
+    // Type errors now fail the build (was `true`, which masked the eko 4.x upgrade breakage)
+    ignoreBuildErrors: false,
   },
   // Automatically set NEXT_PUBLIC_ENV for client-side access
   // On Vercel: uses VERCEL_ENV, locally: defaults to 'development'
