@@ -13,6 +13,14 @@ describe('chatStore queue + merge dispatch', () => {
     store().clearMessages();
   });
 
+  it('addUserMessage adds a message with role "user" (not assistant)', () => {
+    store().addUserMessage('hello');
+    const msgs = store().messages;
+    expect(msgs).toHaveLength(1);
+    expect(msgs[0].role).toBe('user');
+    expect(msgs[0].content).toBe('hello');
+  });
+
   it('processes a single assistant message into the list', async () => {
     store().addAssistantMessage(content({ agentName: 'a', type: 'text', text: 'hi' }));
     await flush();
