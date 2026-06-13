@@ -36,6 +36,11 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // Vendored components copied in by shadcn/ui & AI Elements CLIs — owned but
+    // not authored by us; they follow upstream formatting, and re-running the
+    // CLI would overwrite any lint fixes. Treated like node_modules for lint.
+    'src/components/ui/**',
+    'src/components/ai-elements/**',
   ]),
 ]);
 
