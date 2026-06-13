@@ -31,22 +31,24 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = React.memo(({
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          // Code block rendering
-          code({ node, className, children, ...props }: any) {
+          // Code block rendering. `node` is destructured only to keep it out of
+          // `...props` (react-markdown passes it, but it must not reach the DOM).
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          code({ node, className, children, ...props }: Omit<React.ComponentPropsWithoutRef<'code'>, 'style'> & { node?: unknown }) {
             const match = /language-(\w+)/.exec(className || '');
             const isInline = !match;
 
             return !isInline
               ? (
                 <SyntaxHighlighter
-                  style={oneLight as any}
-                  language={match[1]}
+                  style={oneLight}
+                  language={match?.[1]}
                   PreTag="div"
                   customStyle={{
                     margin: '16px 0',
                     borderRadius: '4px',
                     fontSize: '13px',
-                  } as any}
+                  } as React.CSSProperties}
                   {...props}
                 >
                   {String(children).replace(/\n$/, '')}

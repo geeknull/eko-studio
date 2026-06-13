@@ -41,7 +41,7 @@ let serverPort: number = 0;
  * Find an available port
  */
 async function findAvailablePort(startPort: number = 3000): Promise<number> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const server = net.createServer();
     server.unref();
     server.on('error', () => {
@@ -66,7 +66,8 @@ async function waitForServer(url: string, maxAttempts: number = 30): Promise<boo
         const req = http.get(url, (res) => {
           if (res.statusCode === 200 || res.statusCode === 304) {
             resolve();
-          } else {
+          }
+          else {
             reject(new Error(`Status: ${res.statusCode}`));
           }
         });
@@ -77,8 +78,9 @@ async function waitForServer(url: string, maxAttempts: number = 30): Promise<boo
         });
       });
       return true;
-    } catch {
-      await new Promise((r) => setTimeout(r, 500));
+    }
+    catch {
+      await new Promise(r => setTimeout(r, 500));
     }
   }
   return false;
@@ -91,7 +93,8 @@ function getStandaloneServerPath(): string {
   if (app.isPackaged) {
     // Production: server is in resources
     return path.join(process.resourcesPath, 'standalone', 'server.js');
-  } else {
+  }
+  else {
     // Development: use the build output
     return path.join(app.getAppPath(), '.next', 'standalone', 'server.js');
   }
@@ -182,12 +185,14 @@ export async function startNextServer(): Promise<string> {
           if (ready) {
             writeLog('INFO', 'Next.js server is ready');
             resolve(serverUrl);
-          } else {
+          }
+          else {
             reject(new Error(`Server failed to start after waiting\n${stderrOutput}`));
           }
         }
       });
-    } catch (error) {
+    }
+    catch (error) {
       if (!resolved) {
         resolved = true;
         reject(error);

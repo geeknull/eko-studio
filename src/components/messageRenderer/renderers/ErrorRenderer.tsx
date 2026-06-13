@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Typography, Space, Collapse, Descriptions } from 'antd';
+import { Alert, Typography, Space, Collapse } from 'antd';
 import { CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { LazySyntaxHighlighter } from '../../base/LazySyntaxHighlighter';
 import type { StreamCallbackMessage } from '../../../types';
@@ -45,7 +45,7 @@ export const ErrorRenderer: React.FC<ErrorRendererProps> = React.memo(({
 
     // Object error
     if (typeof error === 'object' && error !== null) {
-      const errorObj = error as any;
+      const errorObj = error as { message?: string, error?: string, name?: string, code?: string | number };
       return {
         type: 'Object',
         message: errorObj.message || errorObj.error || JSON.stringify(error),

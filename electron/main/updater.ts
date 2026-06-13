@@ -11,7 +11,8 @@ function loadAutoUpdater(): boolean {
     const updaterModule = require('electron-updater');
     autoUpdater = updaterModule.autoUpdater;
     return true;
-  } catch (error) {
+  }
+  catch {
     console.warn('[AutoUpdater] electron-updater not available, auto-update disabled');
     return false;
   }
@@ -127,7 +128,8 @@ export async function checkForUpdates(): Promise<any | null> {
 
   try {
     return await autoUpdater.checkForUpdates();
-  } catch (error) {
+  }
+  catch (error) {
     console.error('[AutoUpdater] Failed to check for updates:', error);
     return null;
   }

@@ -28,7 +28,7 @@ export const LazySyntaxHighlighter: React.FC<LazySyntaxHighlighterProps> = React
         message.success('Copied to clipboard');
         setTimeout(() => setCopied(false), 2000);
       }
-      catch (err) {
+      catch {
         message.error('Failed to copy');
       }
     };

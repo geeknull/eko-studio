@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import * as path from 'path';
-import { startNextServer, stopNextServer, getServerUrl, getLogPath, setRuntimeErrorHandler } from './server';
+import { startNextServer, stopNextServer, getLogPath, setRuntimeErrorHandler } from './server';
 import { setupAutoUpdater, checkForUpdates } from './updater';
 
 /**
@@ -153,12 +153,14 @@ async function loadApp(): Promise<void> {
     try {
       await mainWindow.loadURL(devUrl);
       mainWindow.webContents.openDevTools();
-    } catch (error) {
+    }
+    catch (error) {
       console.error('[Electron] Failed to load dev URL:', error);
       // Retry after a delay
       setTimeout(() => loadApp(), 2000);
     }
-  } else {
+  }
+  else {
     // Production: start embedded Next.js server
     try {
       console.log('[Electron] Starting Next.js server...');
@@ -173,14 +175,15 @@ async function loadApp(): Promise<void> {
       });
 
       await mainWindow.loadURL(serverUrl);
-    } catch (error: any) {
+    }
+    catch (error: any) {
       const errorMessage = error?.message || String(error);
       console.error('[Electron] Failed to start Next.js server:', error);
       showErrorPage(
         mainWindow,
         'Server Failed to Start',
         'The Next.js server failed to start. Check the error details below:',
-        errorMessage
+        errorMessage,
       );
     }
   }
@@ -245,7 +248,7 @@ process.on('uncaughtException', (error) => {
   showErrorDialog(
     'Unexpected Error',
     'An unexpected error occurred.',
-    error?.message || String(error)
+    error?.message || String(error),
   );
 });
 
@@ -254,6 +257,6 @@ process.on('unhandledRejection', (reason: any) => {
   showErrorDialog(
     'Unexpected Error',
     'An unhandled promise rejection occurred.',
-    reason?.message || String(reason)
+    reason?.message || String(reason),
   );
 });

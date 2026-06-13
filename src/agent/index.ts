@@ -92,11 +92,14 @@ export async function run(options?: {
         config: normalConfig.llm.config || {},
       },
     };
-    console.log('Using normalConfig LLMs:', llms);
   }
-  else {
-    console.log('Using default LLMs:', llms);
-  }
+  // Log the resolved LLM config WITHOUT leaking the API key
+  console.log('[Agent] LLM:', {
+    source: normalConfig?.llm ? 'normalConfig' : 'default',
+    provider: llms.default.provider,
+    model: llms.default.model,
+    hasApiKey: Boolean(llms.default.apiKey),
+  });
 
   // Dynamically import BrowserAgent (executed after polyfill)
   const { BrowserAgent } = await import('@eko-ai/eko-nodejs');
@@ -106,13 +109,14 @@ export async function run(options?: {
 
   // BrowserAgent's constructor takes no args; executablePath (Electron prod) is
   // applied via setOptions(), which flows into chromium.launch({ ...options }).
-  // Type assertion needed: @eko-ai/eko-nodejs Agent differs structurally from core Agent.
+  // Since both @eko-ai/eko and @eko-ai/eko-nodejs are pinned to 4.1.3, BrowserAgent
+  // is assignable to the core Agent type directly — no cast needed.
   const createBrowserAgent = (): Agent => {
     const browserAgent = new BrowserAgent();
     if (executablePath) {
       browserAgent.setOptions({ executablePath });
     }
-    return browserAgent as unknown as Agent;
+    return browserAgent;
   };
 
   // Build agents configuration

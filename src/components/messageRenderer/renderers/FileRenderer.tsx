@@ -54,7 +54,7 @@ export const FileRenderer: React.FC<FileRendererProps> = React.memo(({
       URL.revokeObjectURL(url);
       message.success('File downloaded');
     }
-    catch (error) {
+    catch {
       message.error('Failed to download file');
     }
   };
@@ -67,7 +67,7 @@ export const FileRenderer: React.FC<FileRendererProps> = React.memo(({
       message.success('Data copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
     }
-    catch (error) {
+    catch {
       message.error('Failed to copy data');
     }
   };
@@ -86,6 +86,7 @@ export const FileRenderer: React.FC<FileRendererProps> = React.memo(({
             textAlign: 'center',
           }}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element -- base64 data-URI preview in a desktop app; next/image adds no value here */}
             <img
               src={`data:${mimeType};base64,${data}`}
               alt="Preview"
@@ -126,7 +127,7 @@ export const FileRenderer: React.FC<FileRendererProps> = React.memo(({
           </div>
         );
       }
-      catch (error) {
+      catch {
         return (
           <Text type="secondary" italic style={{ marginTop: '12px', display: 'block' }}>
             Unable to decode text content
