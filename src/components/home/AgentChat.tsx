@@ -2,13 +2,18 @@
 
 import React from 'react';
 import { Card, Avatar, Spin, message } from 'antd';
-import { Bubble, Sender, XProvider } from '@ant-design/x';
+import { Sender, XProvider } from '@ant-design/x';
 import { RobotOutlined } from '@ant-design/icons';
 import { useChatStore, ChatMessage } from '@/store/chatStore';
 import { useConfigStore } from '@/store';
 import { useSSE } from '@/hooks/useSSE';
-import { useMessageItems } from '@/hooks/useMessageItems';
 import { logger } from '@/utils/logger';
+import {
+  Conversation,
+  ConversationContent,
+} from '@/components/ai-elements/conversation';
+import { Message, MessageContent } from '@/components/ai-elements/message';
+import { AgentMessageRenderer } from '@/components/messageRenderer/AgentMessageRenderer';
 
 interface AgentChatProps {
   onViewJson: (message: ChatMessage) => void
@@ -41,9 +46,6 @@ export const AgentChat: React.FC<AgentChatProps> = ({
       message.error('Connection interrupted, please retry');
     },
   });
-
-  // Use useMessageItems Hook to generate message list items
-  const messageItems = useMessageItems(messages, { onViewJson });
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -147,12 +149,25 @@ export const AgentChat: React.FC<AgentChatProps> = ({
             </div>
           )
           : (
-            <Bubble.List
-              className="flex-1 overflow-y-auto p-4"
-              style={{ minHeight: 0 }}
-              autoScroll
-              items={messageItems}
-            />
+            <Conversation className="flex-1 min-h-0">
+              <ConversationContent>
+                {messages.map(m => (
+                  typeof m.content === 'string'
+                    ? (
+                      <Message from={m.role === 'user' ? 'user' : 'assistant'} key={m.id}>
+                        <MessageContent>{m.content}</MessageContent>
+                      </Message>
+                    )
+                    : (
+                      <AgentMessageRenderer
+                        content={m.content}
+                        key={m.id}
+                        onViewJson={() => onViewJson(m)}
+                      />
+                    )
+                ))}
+              </ConversationContent>
+            </Conversation>
           )}
         {isLoading && (
           <div className="flex justify-start gap-3 p-4 border-t">
