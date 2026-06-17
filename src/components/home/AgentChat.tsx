@@ -127,6 +127,14 @@ export const AgentChat: React.FC<AgentChatProps> = ({
     }
   };
 
+  // Crash guard: rendering a long / high-volume run's full history (thousands of
+  // heavy AI Elements components) can exhaust memory and freeze the page. Render
+  // only the most recent window; older messages stay in the store.
+  const MAX_RENDERED_MESSAGES = 100;
+  const hiddenCount = Math.max(0, messages.length - MAX_RENDERED_MESSAGES);
+  const visibleMessages
+    = hiddenCount > 0 ? messages.slice(-MAX_RENDERED_MESSAGES) : messages;
+
   return (
     <XProvider>
       <Card
@@ -151,7 +159,12 @@ export const AgentChat: React.FC<AgentChatProps> = ({
           : (
             <Conversation className="flex-1 min-h-0">
               <ConversationContent>
-                {messages.map(m => (
+                {hiddenCount > 0 && (
+                  <div className="text-center text-xs text-gray-400">
+                    {`${hiddenCount} earlier message(s) hidden for performance`}
+                  </div>
+                )}
+                {visibleMessages.map(m => (
                   typeof m.content === 'string'
                     ? (
                       <Message from={m.role === 'user' ? 'user' : 'assistant'} key={m.id}>
