@@ -1,10 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Typography, Segmented, Button } from 'antd';
-import { ThunderboltOutlined, PlayCircleOutlined, SettingOutlined } from '@ant-design/icons';
-
-const { Text } = Typography;
+import { PlayCircle, Settings, Zap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface HeaderControlsProps {
   mode: 'normal' | 'replay'
@@ -19,36 +17,29 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
 }) => {
   return (
     <div className="flex items-center gap-3">
-      <Text type="secondary">Mode:</Text>
-      <Segmented
-        value={mode}
-        onChange={onModeChange}
-        options={[
-          {
-            label: (
-              <div style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <ThunderboltOutlined />
-                <span>Normal</span>
-              </div>
-            ),
-            value: 'normal',
-          },
-          {
-            label: (
-              <div style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <PlayCircleOutlined />
-                <span>Replay</span>
-              </div>
-            ),
-            value: 'replay',
-          },
-        ]}
-      />
-      <Button
-        icon={<SettingOutlined />}
-        onClick={onConfigClick}
-        title="Configuration"
-      >
+      <span className="text-sm text-muted-foreground">Mode:</span>
+      <div className="flex items-center gap-0.5 rounded-md border p-0.5">
+        <Button
+          className="gap-1.5"
+          onClick={() => onModeChange('normal')}
+          size="sm"
+          variant={mode === 'normal' ? 'default' : 'ghost'}
+        >
+          <Zap className="size-4" />
+          Normal
+        </Button>
+        <Button
+          className="gap-1.5"
+          onClick={() => onModeChange('replay')}
+          size="sm"
+          variant={mode === 'replay' ? 'default' : 'ghost'}
+        >
+          <PlayCircle className="size-4" />
+          Replay
+        </Button>
+      </div>
+      <Button className="gap-1.5" onClick={onConfigClick} variant="outline">
+        <Settings className="size-4" />
         Configuration
       </Button>
     </div>
