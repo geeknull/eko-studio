@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Card, Avatar, Spin, message } from 'antd';
+import { Card, message } from 'antd';
 import { Sender, XProvider } from '@ant-design/x';
-import { RobotOutlined } from '@ant-design/icons';
+import { Bot } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 import { useChatStore, ChatMessage } from '@/store/chatStore';
 import { useConfigStore } from '@/store';
 import { useSSE } from '@/hooks/useSSE';
@@ -183,11 +184,9 @@ export const AgentChat: React.FC<AgentChatProps> = ({
             </Conversation>
           )}
         {isLoading && (
-          <div className="flex justify-start gap-3 p-4 border-t">
-            <Avatar icon={<RobotOutlined />} />
-            <div>
-              <Spin size="small" />
-            </div>
+          <div className="flex justify-start gap-3 border-t p-4">
+            <Bot className="size-6 text-muted-foreground" />
+            <Spinner className="size-5" />
           </div>
         )}
         <div className="border-t pt-4 flex-shrink-0 px-4">
