@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import ServerErrorNotification from '@/components/ServerErrorNotification';
+import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 
 const geistSans = Geist({
@@ -37,6 +38,7 @@ export default function RootLayout({
           <ServerErrorNotification />
           {children}
         </AntdRegistry>
+        <Toaster />
       </body>
     </html>
   );

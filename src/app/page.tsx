@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { ConfigProvider, message } from 'antd';
+import { ConfigProvider } from 'antd';
 import { Bot } from 'lucide-react';
+import { toast } from 'sonner';
 import { ChatMessage } from '@/store/chatStore';
 import { useConfigStore } from '@/store';
 import { JsonViewModal } from '@/components/base/JsonViewModal';
@@ -35,7 +36,7 @@ function App() {
   const handleConfigConfirm = () => {
     setShowConfig(false);
     const currentMode = useConfigStore.getState().mode;
-    message.success(`${currentMode === 'normal' ? 'Normal' : 'Replay'} mode configuration saved`);
+    toast.success(`${currentMode === 'normal' ? 'Normal' : 'Replay'} mode configuration saved`);
   };
 
   // Handle config cancel

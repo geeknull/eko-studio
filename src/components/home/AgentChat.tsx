@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { message } from 'antd';
 import { Sender, XProvider } from '@ant-design/x';
+import { toast } from 'sonner';
 import { Bot } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { useChatStore, ChatMessage } from '@/store/chatStore';
@@ -44,7 +44,7 @@ export const AgentChat: React.FC<AgentChatProps> = ({
     onError: (error) => {
       setLoading(false);
       logger.error('SSE Error:', error);
-      message.error('Connection interrupted, please retry');
+      toast.error('Connection interrupted, please retry');
     },
   });
 
@@ -53,7 +53,7 @@ export const AgentChat: React.FC<AgentChatProps> = ({
 
     // Check if normal mode requires config
     if (mode === 'normal' && !normalConfig) {
-      message.warning('Please configure Normal mode parameters first');
+      toast.warning('Please configure Normal mode parameters first');
       onConfigRequired?.();
       return;
     }
