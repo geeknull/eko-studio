@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card, message } from 'antd';
+import { message } from 'antd';
 import { Sender, XProvider } from '@ant-design/x';
 import { Bot } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
@@ -138,19 +138,7 @@ export const AgentChat: React.FC<AgentChatProps> = ({
 
   return (
     <XProvider>
-      <Card
-        className="flex-1 flex flex-col overflow-hidden min-h-0"
-        styles={{
-          body: {
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            minHeight: 0,
-            padding: 0,
-          },
-        }}
-      >
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border bg-white">
         {messages.length === 0
           ? (
             <div className="flex items-center justify-center h-full text-gray-400 p-4">
@@ -211,7 +199,7 @@ export const AgentChat: React.FC<AgentChatProps> = ({
             autoSize={{ minRows: 2, maxRows: 6 }}
           />
         </div>
-      </Card>
+      </div>
     </XProvider>
   );
 };
