@@ -1,14 +1,20 @@
 'use client';
 
 import React from 'react';
-import { Card, Avatar, Spin, message } from 'antd';
-import { Bubble, Sender, XProvider } from '@ant-design/x';
-import { RobotOutlined } from '@ant-design/icons';
+import { Sender, XProvider } from '@ant-design/x';
+import { toast } from 'sonner';
+import { Bot } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 import { useChatStore, ChatMessage } from '@/store/chatStore';
 import { useConfigStore } from '@/store';
 import { useSSE } from '@/hooks/useSSE';
-import { useMessageItems } from '@/hooks/useMessageItems';
 import { logger } from '@/utils/logger';
+import {
+  Conversation,
+  ConversationContent,
+} from '@/components/ai-elements/conversation';
+import { Message, MessageContent } from '@/components/ai-elements/message';
+import { AgentMessageRenderer } from '@/components/messageRenderer/AgentMessageRenderer';
 
 interface AgentChatProps {
   onViewJson: (message: ChatMessage) => void
@@ -38,19 +44,16 @@ export const AgentChat: React.FC<AgentChatProps> = ({
     onError: (error) => {
       setLoading(false);
       logger.error('SSE Error:', error);
-      message.error('Connection interrupted, please retry');
+      toast.error('Connection interrupted, please retry');
     },
   });
-
-  // Use useMessageItems Hook to generate message list items
-  const messageItems = useMessageItems(messages, { onViewJson });
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
 
     // Check if normal mode requires config
     if (mode === 'normal' && !normalConfig) {
-      message.warning('Please configure Normal mode parameters first');
+      toast.warning('Please configure Normal mode parameters first');
       onConfigRequired?.();
       return;
     }
@@ -125,21 +128,17 @@ export const AgentChat: React.FC<AgentChatProps> = ({
     }
   };
 
+  // Crash guard: rendering a long / high-volume run's full history (thousands of
+  // heavy AI Elements components) can exhaust memory and freeze the page. Render
+  // only the most recent window; older messages stay in the store.
+  const MAX_RENDERED_MESSAGES = 100;
+  const hiddenCount = Math.max(0, messages.length - MAX_RENDERED_MESSAGES);
+  const visibleMessages
+    = hiddenCount > 0 ? messages.slice(-MAX_RENDERED_MESSAGES) : messages;
+
   return (
     <XProvider>
-      <Card
-        className="flex-1 flex flex-col overflow-hidden min-h-0"
-        styles={{
-          body: {
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            minHeight: 0,
-            padding: 0,
-          },
-        }}
-      >
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border bg-white">
         {messages.length === 0
           ? (
             <div className="flex items-center justify-center h-full text-gray-400 p-4">
@@ -147,19 +146,35 @@ export const AgentChat: React.FC<AgentChatProps> = ({
             </div>
           )
           : (
-            <Bubble.List
-              className="flex-1 overflow-y-auto p-4"
-              style={{ minHeight: 0 }}
-              autoScroll
-              items={messageItems}
-            />
+            <Conversation className="flex-1 min-h-0">
+              <ConversationContent>
+                {hiddenCount > 0 && (
+                  <div className="text-center text-xs text-gray-400">
+                    {`${hiddenCount} earlier message(s) hidden for performance`}
+                  </div>
+                )}
+                {visibleMessages.map(m => (
+                  typeof m.content === 'string'
+                    ? (
+                      <Message from={m.role === 'user' ? 'user' : 'assistant'} key={m.id}>
+                        <MessageContent>{m.content}</MessageContent>
+                      </Message>
+                    )
+                    : (
+                      <AgentMessageRenderer
+                        content={m.content}
+                        key={m.id}
+                        onViewJson={() => onViewJson(m)}
+                      />
+                    )
+                ))}
+              </ConversationContent>
+            </Conversation>
           )}
         {isLoading && (
-          <div className="flex justify-start gap-3 p-4 border-t">
-            <Avatar icon={<RobotOutlined />} />
-            <div>
-              <Spin size="small" />
-            </div>
+          <div className="flex justify-start gap-3 border-t p-4">
+            <Bot className="size-6 text-muted-foreground" />
+            <Spinner className="size-5" />
           </div>
         )}
         <div className="border-t pt-4 flex-shrink-0 px-4">
@@ -184,7 +199,7 @@ export const AgentChat: React.FC<AgentChatProps> = ({
             autoSize={{ minRows: 2, maxRows: 6 }}
           />
         </div>
-      </Card>
+      </div>
     </XProvider>
   );
 };

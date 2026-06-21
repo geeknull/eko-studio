@@ -1,7 +1,12 @@
 import React from 'react';
-import { Modal } from 'antd';
 import { ChatMessage } from '../../store/chatStore';
-import { LazySyntaxHighlighter } from './LazySyntaxHighlighter';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { CodeBlock } from '@/components/ai-elements/code-block';
 
 interface JsonViewModalProps {
   open: boolean
@@ -11,23 +16,25 @@ interface JsonViewModalProps {
 
 export const JsonViewModal: React.FC<JsonViewModalProps> = ({ open, message, onClose }) => {
   return (
-    <Modal
-      title="message JSON"
+    <Dialog
       open={open}
-      onCancel={onClose}
-      footer={null}
-      width={800}
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
     >
-      {message && (
-        <div style={{ maxHeight: '60vh', overflow: 'auto' }}>
-          <LazySyntaxHighlighter
-            language="json"
-            shouldRender={open}
-          >
-            {JSON.stringify(message.content, null, 2)}
-          </LazySyntaxHighlighter>
-        </div>
-      )}
-    </Modal>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>message JSON</DialogTitle>
+        </DialogHeader>
+        {message && (
+          <div className="max-h-[60vh] overflow-auto">
+            <CodeBlock
+              code={JSON.stringify(message.content, null, 2)}
+              language="json"
+            />
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };

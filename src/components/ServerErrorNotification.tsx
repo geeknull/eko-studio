@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { notification } from 'antd';
+import { toast } from 'sonner';
 
 export function ServerErrorNotification() {
   useEffect(() => {
@@ -11,25 +11,13 @@ export function ServerErrorNotification() {
     }
 
     const unsubscribe = window.electronAPI.onServerError((_event, error) => {
-      // Show notification
-      notification.error({
-        message: 'Server Error',
+      toast.error('Server Error', {
         description: (
-          <div style={{ maxHeight: 200, overflow: 'auto' }}>
-            <pre style={{
-              fontSize: 12,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-all',
-              margin: 0,
-              fontFamily: 'Monaco, Menlo, monospace',
-            }}
-            >
-              {error}
-            </pre>
-          </div>
+          <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-all font-mono text-xs">
+            {error}
+          </pre>
         ),
-        duration: 0, // Don't auto-close
-        placement: 'bottomRight',
+        duration: Infinity, // Don't auto-close
       });
     });
 

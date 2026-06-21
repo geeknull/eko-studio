@@ -1,17 +1,15 @@
 'use client';
 
 import React from 'react';
-import { ConfigProvider, Layout, Typography, message } from 'antd';
-import { RobotOutlined } from '@ant-design/icons';
+import { ConfigProvider } from 'antd';
+import { Bot } from 'lucide-react';
+import { toast } from 'sonner';
 import { ChatMessage } from '@/store/chatStore';
 import { useConfigStore } from '@/store';
 import { JsonViewModal } from '@/components/base/JsonViewModal';
 import { ConfigModal } from '@/components/home/ConfigModal';
 import { HeaderControls } from '@/components/home/HeaderControls';
 import { AgentChat } from '@/components/home/AgentChat';
-
-const { Header, Content } = Layout;
-const { Title } = Typography;
 
 function App() {
   const [selectedMessage, setSelectedMessage] = React.useState<ChatMessage | null>(null);
@@ -38,7 +36,7 @@ function App() {
   const handleConfigConfirm = () => {
     setShowConfig(false);
     const currentMode = useConfigStore.getState().mode;
-    message.success(`${currentMode === 'normal' ? 'Normal' : 'Replay'} mode configuration saved`);
+    toast.success(`${currentMode === 'normal' ? 'Normal' : 'Replay'} mode configuration saved`);
   };
 
   // Handle config cancel
@@ -48,19 +46,16 @@ function App() {
 
   return (
     <ConfigProvider>
-      <Layout className="h-screen flex flex-col">
-        <Header
-          className="bg-white border-b border-gray-200 flex items-center px-6 flex-shrink-0 h-16"
-          style={{ backgroundColor: '#ffffff', paddingLeft: '24px', paddingRight: '24px' }}
-        >
-          <div className="flex items-center justify-between w-full">
+      <div className="flex h-screen flex-col">
+        <header className="flex h-16 flex-shrink-0 items-center border-b border-gray-200 bg-white px-6">
+          <div className="flex w-full items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shadow-sm">
-                <RobotOutlined style={{ fontSize: '20px', color: 'white' }} />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500 shadow-sm">
+                <Bot className="size-5 text-white" />
               </div>
-              <Title level={4} className="!mb-0 !text-gray-800" style={{ fontWeight: 600, color: '#1f2937', margin: 0 }}>
+              <h1 className="m-0 text-lg font-semibold text-gray-800">
                 Eko Studio
-              </Title>
+              </h1>
             </div>
             <HeaderControls
               mode={mode}
@@ -68,14 +63,14 @@ function App() {
               onConfigClick={() => setShowConfig(true)}
             />
           </div>
-        </Header>
-        <Content className="flex-1 flex flex-col overflow-hidden p-6 min-h-0" style={{ minHeight: 0 }}>
+        </header>
+        <main className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
           <AgentChat
             onViewJson={handleViewJson}
             onConfigRequired={() => setShowConfig(true)}
           />
-        </Content>
-      </Layout>
+        </main>
+      </div>
 
       {/* JSON View Modal */}
       <JsonViewModal
