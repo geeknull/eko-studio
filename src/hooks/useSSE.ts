@@ -4,6 +4,7 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import { SseEventData, AgentMessageEvent } from '../types';
 import { useChatStore } from '@/store/chatStore';
 import { logger } from '@/utils/logger';
+import { toast } from 'sonner';
 
 interface UseSSEOptions {
   url: string
@@ -84,7 +85,14 @@ export const useSSE = ({
     };
 
     eventSource.onerror = async (error) => {
-      logger.error('[SSE] Connection error:', error);
+      // Ignore errors from a connection we already cleaned up (e.g. right after
+      // the server signalled completion) — avoids spurious "connection error"
+      // noise + the dev error overlay.
+      if (eventSourceRef.current !== eventSource) return;
+
+      // SSE errors are frequently transient/benign (reconnects, server close) —
+      // warn rather than error so Next dev doesn't surface a red overlay.
+      logger.warn('[SSE] Connection error', error);
 
       // If connection failed immediately, try to get error details via fetch
       if (eventSource.readyState === EventSource.CLOSED) {
@@ -108,20 +116,12 @@ export const useSSE = ({
               }
             }
 
-            logger.error(`[SSE] Server error details: ${errorDetail}`);
-
-            // Show notification
-            import('antd').then(({ notification }) => {
-              notification.error({
-                message: 'SSE Connection Error',
-                description: errorDetail,
-                duration: 0,
-              });
-            });
+            logger.warn(`[SSE] Server error details: ${errorDetail}`);
+            toast.error('SSE Connection Error', { description: errorDetail, duration: Infinity });
           }
         }
         catch (fetchError) {
-          logger.error('[SSE] Failed to fetch error details:', fetchError);
+          logger.warn('[SSE] Failed to fetch error details:', fetchError);
         }
       }
 
@@ -132,22 +132,25 @@ export const useSSE = ({
     eventSource.addEventListener('error', (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
-        logger.error('[SSE] Server error event:', data);
-        // Show error via notification
+        logger.warn('[SSE] Server error event:', data);
         if (data.error || data.message) {
-          const errorMessage = data.message || data.error;
-          import('antd').then(({ notification }) => {
-            notification.error({
-              message: 'Server Error',
-              description: errorMessage,
-              duration: 0,
-            });
+          toast.error('Server Error', {
+            description: data.message || data.error,
+            duration: Infinity,
           });
         }
       }
       catch {
         // Not a JSON message, ignore
       }
+    });
+
+    // Server signals stream completion — close cleanly so the browser's
+    // EventSource does NOT auto-reconnect (which would hit a 409 "one connection
+    // per task" and surface a spurious connection error).
+    eventSource.addEventListener('completed', () => {
+      logger.log('[SSE] Stream completed');
+      cleanup('Stream completed');
     });
 
     eventSource.onmessage = (event) => {
