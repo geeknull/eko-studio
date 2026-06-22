@@ -199,10 +199,13 @@ function FileRenderer({ content }: { content: StreamCallbackMessage }) {
     );
   }
 
-  // Non-image: decode base64 and show in a CodeBlock
+  // Non-image: decode base64 and show in a CodeBlock.
+  // atob yields a Latin-1 binary string; reinterpret the bytes as UTF-8 so
+  // multi-byte characters (e.g. an em dash) don't turn into mojibake.
   let decoded = '';
   try {
-    decoded = atob(data);
+    const binary = atob(data);
+    decoded = new TextDecoder().decode(Uint8Array.from(binary, c => c.charCodeAt(0)));
   }
   catch {
     decoded = data;

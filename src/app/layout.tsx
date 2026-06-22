@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { AntdRegistry } from '@ant-design/nextjs-registry';
 import ServerErrorNotification from '@/components/ServerErrorNotification';
 import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
@@ -34,10 +33,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AntdRegistry>
-          <ServerErrorNotification />
-          {children}
-        </AntdRegistry>
+        <ServerErrorNotification />
+        {children}
         <Toaster />
       </body>
     </html>
