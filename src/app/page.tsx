@@ -9,6 +9,7 @@ import { JsonViewModal } from '@/components/base/JsonViewModal';
 import { ConfigModal } from '@/components/home/ConfigModal';
 import { HeaderControls } from '@/components/home/HeaderControls';
 import { AgentChat } from '@/components/home/AgentChat';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 function App() {
   const [selectedMessage, setSelectedMessage] = React.useState<ChatMessage | null>(null);
@@ -46,21 +47,24 @@ function App() {
   return (
     <>
       <div className="flex h-screen flex-col">
-        <header className="flex h-16 flex-shrink-0 items-center border-b border-gray-200 bg-white px-6">
+        <header className="flex h-16 flex-shrink-0 items-center border-b border-border bg-background px-6">
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500 shadow-sm">
                 <Bot className="size-5 text-white" />
               </div>
-              <h1 className="m-0 text-lg font-semibold text-gray-800">
+              <h1 className="m-0 text-lg font-semibold text-foreground">
                 Eko Studio
               </h1>
             </div>
-            <HeaderControls
-              mode={mode}
-              onModeChange={handleModeChange}
-              onConfigClick={() => setShowConfig(true)}
-            />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <HeaderControls
+                mode={mode}
+                onModeChange={handleModeChange}
+                onConfigClick={() => setShowConfig(true)}
+              />
+            </div>
           </div>
         </header>
         <main className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
