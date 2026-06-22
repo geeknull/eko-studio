@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { ConfigProvider } from 'antd';
 import { Bot } from 'lucide-react';
 import { toast } from 'sonner';
 import { ChatMessage } from '@/store/chatStore';
@@ -45,7 +44,7 @@ function App() {
   };
 
   return (
-    <ConfigProvider>
+    <>
       <div className="flex h-screen flex-col">
         <header className="flex h-16 flex-shrink-0 items-center border-b border-gray-200 bg-white px-6">
           <div className="flex w-full items-center justify-between">
@@ -85,7 +84,7 @@ function App() {
         onConfirm={handleConfigConfirm}
         onCancel={handleConfigCancel}
       />
-    </ConfigProvider>
+    </>
   );
 }
 
