@@ -1,10 +1,32 @@
 'use client';
 
 import React from 'react';
-import { Modal, Tabs, Form } from 'antd';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useConfigStore } from '@/store';
-import type { NormalConfig, ReplayConfig, NormalConfigFormValues, ReplayConfigFormValues } from '@/types';
+import type { LLMprovider } from '@eko-ai/eko/types';
+import type { NormalConfig, ReplayConfig } from '@/types';
 import { getDefaultReplayConfig } from '@/config/replayConfig';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import {
+  createReplayConfigSchema,
+  normalConfigSchema,
+  type NormalConfigSchema,
+  type ReplayConfigSchema,
+} from './configSchemas';
 import { NormalConfigForm } from './NormalConfigForm';
 import { ReplayConfigForm } from './ReplayConfigForm';
 
@@ -20,17 +42,15 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
   onCancel,
 }) => {
   const { mode: currentMode, normalConfig, replayConfig, updateConfig } = useConfigStore();
-  const [normalForm] = Form.useForm();
-  const [replayForm] = Form.useForm();
   const [activeTab, setActiveTab] = React.useState<'normal' | 'replay'>(currentMode);
-  const [playbackMode, setPlaybackMode] = React.useState<'realtime' | 'fixed'>(replayConfig.playbackMode);
-  const [formKey, setFormKey] = React.useState(0);
 
-  // Calculate initial values
-  const normalInitialValues = React.useMemo<NormalConfigFormValues>(() => {
+  const replaySchema = React.useMemo(() => createReplayConfigSchema(), []);
+
+  // Initial values (from store, with sensible defaults)
+  const normalInitialValues = React.useMemo<NormalConfigSchema>(() => {
     if (normalConfig) {
       return {
-        provider: normalConfig.llm.provider,
+        provider: normalConfig.llm.provider as string,
         model: normalConfig.llm.model,
         apiKey: normalConfig.llm.apiKey,
         baseURL: normalConfig.llm.config?.baseURL,
@@ -53,7 +73,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     };
   }, [normalConfig]);
 
-  const replayInitialValues = React.useMemo<ReplayConfigFormValues>(() => {
+  const replayInitialValues = React.useMemo<ReplayConfigSchema>(() => {
     const defaultConfig = getDefaultReplayConfig(replayConfig.playbackMode);
     return {
       playbackMode: replayConfig.playbackMode,
@@ -62,112 +82,95 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
     };
   }, [replayConfig]);
 
-  // Initialize form values and state
+  const normalForm = useForm<NormalConfigSchema>({
+    resolver: zodResolver(normalConfigSchema),
+    defaultValues: normalInitialValues,
+  });
+
+  const replayForm = useForm<ReplayConfigSchema>({
+    resolver: zodResolver(replaySchema),
+    defaultValues: replayInitialValues,
+  });
+
+  // Re-initialize forms each time the modal opens
   React.useEffect(() => {
     if (open) {
       setActiveTab(currentMode);
-      setPlaybackMode(replayConfig.playbackMode);
-      // Update key each time modal opens to force Form remount
-      setFormKey(prev => prev + 1);
+      normalForm.reset(normalInitialValues);
+      replayForm.reset(replayInitialValues);
     }
-  }, [open, currentMode, replayConfig.playbackMode]);
+  }, [open, currentMode, normalInitialValues, replayInitialValues, normalForm, replayForm]);
 
-  const handleOk = () => {
-    // Validate the corresponding form based on current tab
-    const formToValidate = activeTab === 'normal' ? normalForm : replayForm;
+  const handleConfirm = async () => {
+    // Validate only the active tab's form (matches the old antd behavior)
+    const activeForm = activeTab === 'normal' ? normalForm : replayForm;
+    const valid = await activeForm.trigger();
+    if (!valid) return;
 
-    formToValidate.validateFields().then(() => {
-      // Get values from both forms
-      const normalValues = normalForm.getFieldsValue();
-      const replayValues = replayForm.getFieldsValue();
+    const normalValues = normalForm.getValues();
+    const replayValues = replayForm.getValues();
 
-      let normalConfigResult: NormalConfig | null = null;
-
-      // Build Normal config
-      if (normalValues.provider && normalValues.model && normalValues.apiKey) {
-        // Model is now a string, no need to handle array
-        const modelValue = normalValues.model;
-
-        normalConfigResult = {
-          llm: {
-            provider: normalValues.provider,
-            model: modelValue,
-            apiKey: normalValues.apiKey,
-            config: {
-              baseURL: normalValues.baseURL,
-              temperature: normalValues.temperature,
-              topP: normalValues.topP,
-              topK: normalValues.topK,
-              maxTokens: normalValues.maxTokens,
-            },
+    let normalConfigResult: NormalConfig | null = null;
+    if (normalValues.provider && normalValues.model && normalValues.apiKey) {
+      normalConfigResult = {
+        llm: {
+          provider: normalValues.provider as LLMprovider,
+          model: normalValues.model,
+          apiKey: normalValues.apiKey,
+          config: {
+            baseURL: normalValues.baseURL,
+            temperature: normalValues.temperature,
+            topP: normalValues.topP,
+            topK: normalValues.topK,
+            maxTokens: normalValues.maxTokens,
           },
-          agents: normalValues.agents || [],
-        };
-      }
-      else if (normalConfig) {
-        // Keep existing config
-        normalConfigResult = normalConfig;
-      }
-
-      // Build Replay config
-      const replayConfigResult: ReplayConfig = {
-        playbackMode: replayValues.playbackMode || replayConfig.playbackMode,
-        speed: replayValues.speed || replayConfig.speed,
-        fixedInterval: replayValues.fixedInterval || replayConfig.fixedInterval,
+        },
+        agents: normalValues.agents ?? [],
       };
+    }
+    else if (normalConfig) {
+      normalConfigResult = normalConfig;
+    }
 
-      updateConfig(activeTab, normalConfigResult, replayConfigResult);
-      onConfirm();
-    });
-  };
+    const replayConfigResult: ReplayConfig = {
+      playbackMode: replayValues.playbackMode ?? replayConfig.playbackMode,
+      speed: replayValues.speed ?? replayConfig.speed,
+      fixedInterval: replayValues.fixedInterval ?? replayConfig.fixedInterval,
+    };
 
-  const handleCancel = () => {
-    normalForm.resetFields();
-    replayForm.resetFields();
-    onCancel();
+    updateConfig(activeTab, normalConfigResult, replayConfigResult);
+    onConfirm();
   };
 
   return (
-    <Modal
-      title="Configuration"
-      open={open}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      width={700}
-      okText="Confirm"
-      cancelText="Cancel"
-    >
-      <Tabs
-        activeKey={activeTab}
-        onChange={key => setActiveTab(key as 'normal' | 'replay')}
-        destroyOnHidden={false}
-        items={[
-          {
-            key: 'normal',
-            label: 'Normal Mode',
-            children: (
-              <NormalConfigForm
-                form={normalForm}
-                initialValues={normalInitialValues}
-                formKey={formKey}
-              />
-            ),
-          },
-          {
-            key: 'replay',
-            label: 'Replay Mode',
-            children: (
-              <ReplayConfigForm
-                form={replayForm}
-                initialValues={replayInitialValues}
-                formKey={formKey}
-                playbackMode={playbackMode}
-                onPlaybackModeChange={setPlaybackMode}
-              />
-            ),
-          },
-        ]}
-      />
-    </Modal>
+    <Dialog open={open} onOpenChange={isOpen => !isOpen && onCancel()}>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Configuration</DialogTitle>
+        </DialogHeader>
+
+        <Tabs onValueChange={key => setActiveTab(key as 'normal' | 'replay')} value={activeTab}>
+          <TabsList>
+            <TabsTrigger value="normal">Normal Mode</TabsTrigger>
+            <TabsTrigger value="replay">Replay Mode</TabsTrigger>
+          </TabsList>
+          <TabsContent forceMount hidden={activeTab !== 'normal'} value="normal">
+            <NormalConfigForm form={normalForm} />
+          </TabsContent>
+          <TabsContent forceMount hidden={activeTab !== 'replay'} value="replay">
+            <ReplayConfigForm form={replayForm} />
+          </TabsContent>
+        </Tabs>
+
+        <DialogFooter>
+          <Button onClick={onCancel} type="button" variant="outline">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm} type="button">
+            Confirm
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

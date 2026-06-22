@@ -1,288 +1,324 @@
 'use client';
 
 import React from 'react';
-import { Form, Select, Input, InputNumber, Checkbox, Space, Typography, Collapse, Row, Col, Tooltip, AutoComplete } from 'antd';
-import { getModelOptions, getDefaultBaseURL } from './llmProviderUtils';
+import type { UseFormReturn } from 'react-hook-form';
+import { ChevronDown } from 'lucide-react';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { getDefaultBaseURL, getModelOptions } from './llmProviderUtils';
 import { isDevelopment } from '@/utils/env';
-import type { NormalConfigFormValues } from '@/types';
+import type { NormalConfigSchema } from './configSchemas';
 import type { LLMprovider } from '@eko-ai/eko/types';
 
-const { Text } = Typography;
-
 interface NormalConfigFormProps {
-  form: ReturnType<typeof Form.useForm>[0]
-  initialValues?: NormalConfigFormValues
-  formKey?: number
+  form: UseFormReturn<NormalConfigSchema>
 }
 
-export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({
-  form,
-  initialValues,
-  formKey,
-}) => {
+const PROVIDER_OPTIONS = [
+  { value: 'openai', label: 'OpenAI' },
+  { value: 'anthropic', label: 'Anthropic' },
+  { value: 'google', label: 'Google' },
+  { value: 'bedrock', label: 'AWS Bedrock' },
+  { value: 'azure', label: 'Azure OpenAI' },
+  { value: 'openrouter', label: 'OpenRouter' },
+  { value: 'openai-compatible', label: 'OpenAI Compatible' },
+  { value: 'modelscope', label: 'ModelScope' },
+];
+
+// Optional number field: empty input -> undefined, otherwise the numeric value.
+function toOptionalNumber(value: string): number | undefined {
+  return value === '' ? undefined : Number(value);
+}
+
+export const NormalConfigForm: React.FC<NormalConfigFormProps> = ({ form }) => {
   const isDevEnv = isDevelopment();
-
-  // Filter out BrowserAgent from initial values if not in development environment
-  // (FileAgent was removed in eko 4.x, so AgentType only contains 'BrowserAgent')
-  React.useEffect(() => {
-    if (!isDevEnv && initialValues?.agents) {
-      const filteredAgents = initialValues.agents.filter(
-        agent => agent !== 'BrowserAgent',
-      );
-      if (filteredAgents.length !== initialValues.agents.length) {
-        form.setFieldValue('agents', filteredAgents);
-      }
-    }
-  }, [isDevEnv, initialValues, form]);
-
-  const providerOptions = [
-    { value: 'openai', label: 'OpenAI' },
-    { value: 'anthropic', label: 'Anthropic' },
-    { value: 'google', label: 'Google' },
-    { value: 'bedrock', label: 'AWS Bedrock' },
-    { value: 'azure', label: 'Azure OpenAI' },
-    { value: 'openrouter', label: 'OpenRouter' },
-    { value: 'openai-compatible', label: 'OpenAI Compatible' },
-    { value: 'modelscope', label: 'ModelScope' },
-  ];
-
-  // Note: FileAgent was removed in eko 4.x
-  const agentOptions = [
-    { value: 'BrowserAgent', label: 'Browser Agent - Browser automation capabilities' },
-  ];
+  const provider = form.watch('provider') as LLMprovider | undefined;
+  const modelOptions = provider ? getModelOptions(provider) : [];
+  const modelListId = React.useId();
 
   return (
-    <Form
-      key={`normal-${formKey}`}
-      form={form}
-      layout="vertical"
-      name="normalConfig"
-      initialValues={initialValues}
-      preserve={false}
-    >
-      <Typography.Title level={5} style={{ marginTop: 0 }}>
-        LLM Configuration
-      </Typography.Title>
+    <Form {...form}>
+      <div className="space-y-4">
+        <h5 className="text-sm font-semibold">LLM Configuration</h5>
 
-      <Row gutter={16}>
-        <Col span={12}>
-          <Form.Item
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
             name="provider"
-            label="Provider"
-            rules={[{ required: true, message: 'Please select a Provider' }]}
-          >
-            <Select
-              options={providerOptions}
-              onChange={(value) => {
-                const models = getModelOptions(value);
-                if (models.length > 0) {
-                  form.setFieldValue('model', models[0]);
-                }
-                // Update Base URL when provider changes
-                const defaultBaseURL = getDefaultBaseURL(value);
-                if (defaultBaseURL) {
-                  form.setFieldValue('baseURL', defaultBaseURL);
-                }
-              }}
-            />
-          </Form.Item>
-        </Col>
-
-        <Col span={12}>
-          <Form.Item
-            label="Model"
-            shouldUpdate={(prevValues, currentValues) => prevValues?.provider !== currentValues?.provider}
-          >
-            {({ getFieldValue }) => {
-              const provider = getFieldValue('provider') as LLMprovider | undefined;
-              return (
-                <Form.Item
-                  name="model"
-                  rules={[{ required: true, message: 'Please enter model name' }]}
-                  noStyle
-                >
-                  <AutoComplete
-                    allowClear
-                    placeholder="Select or enter model name"
-                    options={
-                      provider ? getModelOptions(provider).map(m => ({ value: m, label: m })) : []
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Provider
+                  {' '}
+                  <span className="text-destructive">*</span>
+                </FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    // Linkage: update model + Base URL when provider changes
+                    const models = getModelOptions(value as LLMprovider);
+                    if (models.length > 0) {
+                      form.setValue('model', models[0]);
                     }
-                    // AutoComplete 默认支持输入自定义值和自动过滤选项
+                    const defaultBaseURL = getDefaultBaseURL(value as LLMprovider);
+                    if (defaultBaseURL) {
+                      form.setValue('baseURL', defaultBaseURL);
+                    }
+                  }}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a Provider" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {PROVIDER_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="model"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Model
+                  {' '}
+                  <span className="text-destructive">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    list={modelListId}
+                    placeholder="Select or enter model name"
+                    {...field}
                   />
-                </Form.Item>
-              );
-            }}
-          </Form.Item>
-        </Col>
-      </Row>
+                </FormControl>
+                <datalist id={modelListId}>
+                  {modelOptions.filter(Boolean).map(m => (
+                    <option key={m} value={m} />
+                  ))}
+                </datalist>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-      <Form.Item
-        name="apiKey"
-        label="API Key"
-        rules={[{ required: true, message: 'Please enter API Key' }]}
-      >
-        <Input.Password placeholder="Enter API Key" autoComplete="new-password" />
-      </Form.Item>
+        <FormField
+          control={form.control}
+          name="apiKey"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                API Key
+                {' '}
+                <span className="text-destructive">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  autoComplete="new-password"
+                  placeholder="Enter API Key"
+                  type="password"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Form.Item
-        name="baseURL"
-        label="Base URL"
-        extra="Custom API base URL (optional)"
-      >
-        <Input placeholder="e.g., https://openrouter.ai/api/v1" />
-      </Form.Item>
+        <FormField
+          control={form.control}
+          name="baseURL"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Base URL</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="e.g., https://openrouter.ai/api/v1"
+                  {...field}
+                  value={field.value ?? ''}
+                />
+              </FormControl>
+              <FormDescription>Custom API base URL (optional)</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Collapse
-        ghost
-        items={[
-          {
-            key: '1',
-            label: 'Advanced Configuration',
-            children: (
-              <>
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      name="temperature"
-                      label={(
-                        <Space>
-                          <span>Temperature</span>
-                          <Text type="secondary" style={{ fontSize: '12px' }}>
-                            (0.0 - 2.0)
-                          </Text>
-                        </Space>
-                      )}
-                      rules={[
-                        { type: 'number', min: 0, max: 2, message: 'Range: 0.0 - 2.0' },
-                      ]}
-                    >
-                      <InputNumber
-                        min={0}
+        <Collapsible>
+          <CollapsibleTrigger className="group flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            <ChevronDown className="size-4 transition-transform group-data-[state=open]:rotate-180" />
+            Advanced Configuration
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-4 pt-3">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="temperature"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Temperature
+                      {' '}
+                      <span className="text-xs font-normal text-muted-foreground">(0.0 - 2.0)</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
                         max={2}
-                        step={0.1}
-                        precision={1}
-                        style={{ width: '100%' }}
-                      />
-                    </Form.Item>
-                  </Col>
-
-                  <Col span={12}>
-                    <Form.Item
-                      name="topP"
-                      label={(
-                        <Space>
-                          <span>Top P</span>
-                          <Text type="secondary" style={{ fontSize: '12px' }}>
-                            (0.0 - 1.0)
-                          </Text>
-                        </Space>
-                      )}
-                      rules={[
-                        { type: 'number', min: 0, max: 1, message: 'Range: 0.0 - 1.0' },
-                      ]}
-                    >
-                      <InputNumber
                         min={0}
-                        max={1}
+                        onChange={e => field.onChange(toOptionalNumber(e.target.value))}
                         step={0.1}
-                        precision={1}
-                        style={{ width: '100%' }}
+                        type="number"
+                        value={field.value ?? ''}
                       />
-                    </Form.Item>
-                  </Col>
-                </Row>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      name="topK"
-                      label="Top K"
-                      extra="Supported by some providers"
-                    >
-                      <InputNumber
-                        min={1}
+              <FormField
+                control={form.control}
+                name="topP"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Top P
+                      {' '}
+                      <span className="text-xs font-normal text-muted-foreground">(0.0 - 1.0)</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        max={1}
+                        min={0}
+                        onChange={e => field.onChange(toOptionalNumber(e.target.value))}
+                        step={0.1}
+                        type="number"
+                        value={field.value ?? ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="topK"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Top K</FormLabel>
+                    <FormControl>
+                      <Input
                         max={100}
-                        style={{ width: '100%' }}
-                      />
-                    </Form.Item>
-                  </Col>
-
-                  <Col span={12}>
-                    <Form.Item
-                      name="maxTokens"
-                      label="Max Tokens"
-                    >
-                      <InputNumber
                         min={1}
-                        max={128000}
-                        style={{ width: '100%' }}
+                        onChange={e => field.onChange(toOptionalNumber(e.target.value))}
+                        type="number"
+                        value={field.value ?? ''}
                       />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </>
-            ),
-          },
-        ]}
-      />
+                    </FormControl>
+                    <FormDescription>Supported by some providers</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-      <Typography.Title level={5} style={{ marginTop: 24, marginBottom: 16 }}>
-        Agents Configuration
-      </Typography.Title>
+              <FormField
+                control={form.control}
+                name="maxTokens"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max Tokens</FormLabel>
+                    <FormControl>
+                      <Input
+                        max={128000}
+                        min={1}
+                        onChange={e => field.onChange(toOptionalNumber(e.target.value))}
+                        type="number"
+                        value={field.value ?? ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
 
-      <Form.Item
-        name="agents"
-        rules={[
-          {
-            validator: (_, value) => {
-              if (!value || value.length === 0) {
-                return Promise.reject(new Error('Please select at least one Agent'));
-              }
-              return Promise.resolve();
-            },
-          },
-        ]}
-      >
-        <Checkbox.Group style={{ width: '100%' }}>
-          <Space orientation="vertical" style={{ width: '100%' }}>
-            {agentOptions.map((option) => {
-              const isDisabled = !isDevEnv;
+        <h5 className="pt-2 text-sm font-semibold">Agents Configuration</h5>
 
-              const checkbox = (
-                <Checkbox key={option.value} value={option.value} disabled={isDisabled}>
-                  {option.label}
-                </Checkbox>
-              );
+        <FormField
+          control={form.control}
+          name="agents"
+          render={({ field }) => {
+            const checked = field.value?.includes('BrowserAgent') ?? false;
+            return (
+              <FormItem>
+                <div
+                  className="flex items-center gap-2"
+                  title={isDevEnv ? undefined : 'Only available in local development environment'}
+                >
+                  <FormControl>
+                    <Checkbox
+                      checked={checked}
+                      disabled={!isDevEnv}
+                      onCheckedChange={value => field.onChange(value ? ['BrowserAgent'] : [])}
+                    />
+                  </FormControl>
+                  <FormLabel className="font-normal">
+                    Browser Agent - Browser automation capabilities
+                  </FormLabel>
+                </div>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
 
-              if (isDisabled) {
-                return (
-                  <Tooltip
-                    key={option.value}
-                    title="Only available in local development environment"
-                    placement="right"
-                  >
-                    {checkbox}
-                  </Tooltip>
-                );
-              }
-
-              return checkbox;
-            })}
-          </Space>
-        </Checkbox.Group>
-      </Form.Item>
-
-      <div style={{ marginTop: '16px', padding: '12px', background: '#f5f5f5', borderRadius: '4px' }}>
-        <Text type="secondary" style={{ fontSize: '12px' }}>
+        <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
           <strong>Description:</strong>
-          <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+          <ul className="my-2 list-disc space-y-1 pl-5">
             <li>
               <strong>Browser Agent:</strong>
               {' '}
               Provides browser automation capabilities, can access web pages, click, fill forms, etc.
             </li>
           </ul>
-        </Text>
+        </div>
       </div>
     </Form>
   );

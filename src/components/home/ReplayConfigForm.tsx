@@ -1,141 +1,127 @@
 'use client';
 
 import React from 'react';
-import { Form, Select, InputNumber, Space, Typography } from 'antd';
-import { getFixedIntervalConfig, getSpeedConfig, getDefaultReplayConfig } from '@/config/replayConfig';
-import type { ReplayConfigFormValues } from '@/types';
-
-const { Text } = Typography;
+import type { UseFormReturn } from 'react-hook-form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { getFixedIntervalConfig, getSpeedConfig } from '@/config/replayConfig';
+import type { ReplayConfigSchema } from './configSchemas';
 
 interface ReplayConfigFormProps {
-  form: ReturnType<typeof Form.useForm>[0]
-  initialValues?: ReplayConfigFormValues
-  formKey?: number
-  playbackMode: 'realtime' | 'fixed'
-  onPlaybackModeChange: (mode: 'realtime' | 'fixed') => void
+  form: UseFormReturn<ReplayConfigSchema>
 }
 
-export const ReplayConfigForm: React.FC<ReplayConfigFormProps> = ({
-  form,
-  initialValues,
-  formKey,
-  playbackMode,
-  onPlaybackModeChange,
-}) => {
-  // Use centralized config for default values
-  const getDefaultValues = (): ReplayConfigFormValues => {
-    const defaultConfig = getDefaultReplayConfig(playbackMode);
-
-    return {
-      playbackMode,
-      speed: initialValues?.speed ?? defaultConfig.speed,
-      fixedInterval: initialValues?.fixedInterval ?? defaultConfig.fixedInterval,
-    };
-  };
+export const ReplayConfigForm: React.FC<ReplayConfigFormProps> = ({ form }) => {
+  const playbackMode = form.watch('playbackMode');
+  const speedConfig = getSpeedConfig();
+  const fixedIntervalConfig = getFixedIntervalConfig();
 
   return (
-    <Form
-      key={`replay-${formKey}`}
-      form={form}
-      layout="vertical"
-      name="replayConfig"
-      initialValues={getDefaultValues()}
-      preserve={false}
-    >
-      <Form.Item
-        name="playbackMode"
-        label="Playback Mode"
-        rules={[{ required: true, message: 'Please select playback mode' }]}
-      >
-        <Select
-          onChange={value => onPlaybackModeChange(value)}
-          options={[
-            { value: 'realtime', label: 'realtime - Play with original time intervals' },
-            { value: 'fixed', label: 'fixed - Play with fixed time intervals' },
-          ]}
+    <Form {...form}>
+      <div className="space-y-4">
+        <FormField
+          control={form.control}
+          name="playbackMode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Playback Mode</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select playback mode" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="realtime">
+                    realtime - Play with original time intervals
+                  </SelectItem>
+                  <SelectItem value="fixed">
+                    fixed - Play with fixed time intervals
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </Form.Item>
 
-      {playbackMode === 'realtime' && (() => {
-        const speedConfig = getSpeedConfig();
-        return (
-          <Form.Item
+        {playbackMode === 'realtime' && (
+          <FormField
+            control={form.control}
             name="speed"
-            label={(
-              <Space>
-                <span>Playback Speed</span>
-                <Text type="secondary" style={{ fontSize: '12px' }}>
-                  {`(${speedConfig.min} - ${speedConfig.max}x)`}
-                </Text>
-              </Space>
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Playback Speed
+                  {' '}
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {`(${speedConfig.min} - ${speedConfig.max}x)`}
+                  </span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    max={speedConfig.max}
+                    min={speedConfig.min}
+                    onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)}
+                    placeholder="Enter playback speed"
+                    step={speedConfig.step}
+                    type="number"
+                    value={field.value ?? ''}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-            rules={[
-              { required: true, message: 'Please enter playback speed' },
-              {
-                type: 'number',
-                min: speedConfig.min,
-                max: speedConfig.max,
-                message: `Speed must be between ${speedConfig.min} and ${speedConfig.max}`,
-              },
-            ]}
-          >
-            <InputNumber
-              min={speedConfig.min}
-              max={speedConfig.max}
-              step={speedConfig.step}
-              precision={speedConfig.precision}
-              style={{ width: '100%' }}
-              placeholder="Enter playback speed"
-            />
-          </Form.Item>
-        );
-      })()}
+          />
+        )}
 
-      {playbackMode === 'fixed' && (() => {
-        const fixedIntervalConfig = getFixedIntervalConfig();
-        return (
-          <Form.Item
+        {playbackMode === 'fixed' && (
+          <FormField
+            control={form.control}
             name="fixedInterval"
-            label={(
-              <Space>
-                <span>Fixed Interval</span>
-                <Text type="secondary" style={{ fontSize: '12px' }}>
-                  (
-                  {fixedIntervalConfig.min}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Fixed Interval
                   {' '}
-                  -
-                  {' '}
-                  {fixedIntervalConfig.max}
-                  {' '}
-                  ms)
-                </Text>
-              </Space>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {`(${fixedIntervalConfig.min} - ${fixedIntervalConfig.max} ms)`}
+                  </span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    max={fixedIntervalConfig.max}
+                    min={fixedIntervalConfig.min}
+                    onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)}
+                    placeholder="Enter fixed interval (ms)"
+                    step={fixedIntervalConfig.step}
+                    type="number"
+                    value={field.value ?? ''}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-            rules={[
-              { required: true, message: 'Please enter fixed interval' },
-              {
-                type: 'number',
-                min: fixedIntervalConfig.min,
-                max: fixedIntervalConfig.max,
-                message: `Interval must be between ${fixedIntervalConfig.min} and ${fixedIntervalConfig.max} ms`,
-              },
-            ]}
-          >
-            <InputNumber
-              min={fixedIntervalConfig.min}
-              max={fixedIntervalConfig.max}
-              step={fixedIntervalConfig.step}
-              style={{ width: '100%' }}
-              placeholder="Enter fixed interval (ms)"
-            />
-          </Form.Item>
-        );
-      })()}
+          />
+        )}
 
-      <div style={{ marginTop: '16px', padding: '12px', background: '#f5f5f5', borderRadius: '4px' }}>
-        <Text type="secondary" style={{ fontSize: '12px' }}>
+        <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
           <strong>Description:</strong>
-          <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+          <ul className="my-2 list-disc space-y-1 pl-5">
             <li>
               <strong>Realtime Mode:</strong>
               {' '}
@@ -147,7 +133,7 @@ export const ReplayConfigForm: React.FC<ReplayConfigFormProps> = ({
               Play each message with fixed time intervals, ignoring original timestamps
             </li>
           </ul>
-        </Text>
+        </div>
       </div>
     </Form>
   );
