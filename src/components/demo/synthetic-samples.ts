@@ -3,7 +3,7 @@ import type { StreamCallbackMessage } from '@/types';
 /**
  * Synthetic samples for message types absent from the recorded logs — the logged
  * agent run produced no `file` or `error` messages, so these are hand-built to
- * exercise the DemoMessageRenderer `file` and `error` branches. Field shapes
+ * exercise the AgentMessageRenderer `file` and `error` branches. Field shapes
  * mirror the existing FileRenderer / ErrorRenderer.
  */
 export const SYNTHETIC_SAMPLES: StreamCallbackMessage[] = [
