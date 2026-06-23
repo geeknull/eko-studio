@@ -1,13 +1,14 @@
 # Eko Studio
 
-基于 [Eko](https://github.com/FellouAI/eko) 的 AI Agent 可视化与调试平台。前端用 Next.js + Ant Design 实时渲染 Agent 的工作流、思考、工具调用与结果;既能作为 Web 应用运行,也打包成 Electron 桌面应用(内置浏览器自动化能力)。
+基于 [Eko](https://github.com/FellouAI/eko) 的 AI Agent 可视化与调试平台。前端用 Next.js + AI Elements + shadcn/ui 实时渲染 Agent 的工作流、思考、工具调用与结果;既能作为 Web 应用运行,也打包成 Electron 桌面应用(内置浏览器自动化能力)。
 
 > 更详细的代码结构与组件约定见 [DEVELOPMENT.md](./DEVELOPMENT.md)。
 
 ## 技术栈
 
 - **框架**:Next.js 16 (App Router) + React 19
-- **UI**:Ant Design 6 + [@ant-design/x](https://x.ant.design)(AI 场景组件)
+- **UI**:[Vercel AI Elements](https://elements.ai-sdk.dev) + [shadcn/ui](https://ui.shadcn.com)(Radix 地基)+ Tailwind CSS;暗色模式用 next-themes(Header 手动切换)
+- **表单**:react-hook-form + zod
 - **状态**:Zustand
 - **Agent**:[@eko-ai/eko](https://www.npmjs.com/package/@eko-ai/eko) + [@eko-ai/eko-nodejs](https://www.npmjs.com/package/@eko-ai/eko-nodejs)(BrowserAgent,基于 Playwright)
 - **桌面端**:Electron(生产模式内嵌 Next.js standalone server)

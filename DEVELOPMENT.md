@@ -23,7 +23,9 @@ Eko Studio is a Next.js-based AI Agent visualization and debugging platform.
 ### Core Tech Stack
 
 - **Framework**: Next.js 15+ (App Router)
-- **UI Component Library**: Ant Design 5.x + @ant-design/x (AI dedicated components)
+- **UI Component Library**: [Vercel AI Elements](https://elements.ai-sdk.dev) + [shadcn/ui](https://ui.shadcn.com) (Radix primitives)
+- **Forms**: react-hook-form + zod
+- **Theming**: next-themes (manual light/dark toggle in the header)
 - **State Management**: Zustand
 - **Styling**: Tailwind CSS
 - **Language**: TypeScript
